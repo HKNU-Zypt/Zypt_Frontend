@@ -25,7 +25,7 @@ class _StudyTimeScreenState extends State<StudyTimeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadModel();
+    // _loadModel();
     _initializeCamera();
   }
 
@@ -38,7 +38,12 @@ class _StudyTimeScreenState extends State<StudyTimeScreen> {
         (camera) => camera.lensDirection == CameraLensDirection.front,
       );
 
-      _controller = CameraController(frontCamera, ResolutionPreset.medium);
+      _controller = CameraController(
+        frontCamera,
+        ResolutionPreset.medium,
+        enableAudio: false,
+        imageFormatGroup: ImageFormatGroup.yuv420,
+      );
 
       await _controller.initialize();
       setState(() {
