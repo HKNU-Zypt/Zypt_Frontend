@@ -4,28 +4,30 @@ import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:focused_study_time_tracker/layout/default_layout.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:pytorch_lite/pytorch_lite.dart';
+import '../services/focus_analyzer.dart';
 
-class StudyTimeScreen extends StatefulWidget {
-  const StudyTimeScreen({super.key});
+class FocusTimeScreen extends StatefulWidget {
+  const FocusTimeScreen({super.key});
 
   @override
-  State<StudyTimeScreen> createState() => _StudyTimeScreenState();
+  State<FocusTimeScreen> createState() => _FocusTimeScreenState();
 }
 
-class _StudyTimeScreenState extends State<StudyTimeScreen> {
-  late ClassificationModel classificationModel;
+class _FocusTimeScreenState extends State<FocusTimeScreen> {
+  late FocusAnalyzer _focusAnalyzer;
   late CameraController _controller;
   bool _isCameraInitialized = false;
   Timer? _timer;
-  bool _isModelLoaded = false;
+  bool _isInitialized = false;
   String tempFilePath = "";
+  String _currentLabel = "";
 
   @override
   void initState() {
     super.initState();
-    // _loadModel();
+    _initializeFocusAnalyzer();
     _initializeCamera();
   }
 
@@ -57,26 +59,14 @@ class _StudyTimeScreenState extends State<StudyTimeScreen> {
     }
   }
 
-  Future<void> _loadModel() async {
+  Future<void> _initializeFocusAnalyzer() async {
     try {
-      // Load PyTorch model
-      final modelPath = 'assets/model.pt';
-
-      // Load model
-      classificationModel = await PytorchLite.loadClassificationModel(
-        modelPath,
-        224,
-        224,
-        5, // class 수
-        labelPath: "assets/labels/label_classification_imageNet.txt",
-      );
-
-      print('Model loaded successfully');
-      setState(() {
-        _isModelLoaded = true;
-      });
+      _focusAnalyzer = FocusAnalyzer();
+      await _focusAnalyzer.initialize();
+      _isInitialized = true;
     } catch (e) {
-      print('Error loading model: $e');
+      print('Error initializing focus analyzer: $e');
+      _isInitialized = false;
     }
   }
 
@@ -107,16 +97,14 @@ class _StudyTimeScreenState extends State<StudyTimeScreen> {
         // Store file path for cleanup
         tempFilePath = path;
 
-        // Process with PyTorch Lite
-        if (_isModelLoaded) {
+        // Process with FocusAnalyzer
+        if (_isInitialized) {
           try {
-            // Run inference with .jpg file
-            final prediction = await classificationModel.getImagePrediction(
-              await File(tempFilePath).readAsBytes(),
-            );
+            final prediction = await _focusAnalyzer.analyzeFocus(imageBytes);
 
-            print('Model prediction: $prediction');
-            // TODO: Process the prediction here
+            setState(() {
+              _currentLabel = prediction;
+            });
           } catch (e) {
             print('Error during inference: $e');
           }
@@ -125,19 +113,17 @@ class _StudyTimeScreenState extends State<StudyTimeScreen> {
         setState(() {
           _photoCount++;
         });
-        print('Photo processed: $_photoCount');
       } catch (e) {
-        print('Error saving temporary file: $e');
         return;
       } finally {
         try {
           await File(tempFilePath).delete();
         } catch (e) {
-          print('Error deleting temporary file: $e');
+          return;
         }
       }
     } catch (e) {
-      print('Error taking photo: $e');
+      return;
     }
   }
 
@@ -160,8 +146,8 @@ class _StudyTimeScreenState extends State<StudyTimeScreen> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return Scaffold(
-      body: Column(
+    return DefaultLayout(
+      child: Column(
         children: [
           Expanded(child: CameraPreview(_controller)),
           Padding(
@@ -170,6 +156,10 @@ class _StudyTimeScreenState extends State<StudyTimeScreen> {
               children: [
                 Text(
                   '사진 수: $_photoCount',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                Text(
+                  '현재 상태: $_currentLabel',
                   style: const TextStyle(fontSize: 16),
                 ),
                 const SizedBox(height: 16),

@@ -4,7 +4,7 @@ import 'package:focused_study_time_tracker/screens/home_screen.dart';
 import 'package:focused_study_time_tracker/screens/login_screen.dart';
 import 'package:focused_study_time_tracker/screens/mypage_screen.dart';
 import 'package:focused_study_time_tracker/screens/statistics_screen.dart';
-import 'package:focused_study_time_tracker/screens/streaming_screen.dart';
+import 'package:focused_study_time_tracker/screens/streaming_join_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
@@ -32,7 +32,7 @@ final router = GoRouter(
         ),
         GoRoute(
           path: '/streaming',
-          builder: (context, state) => StreamingScreen(),
+          builder: (context, state) => StreamingJoinScreen(),
         ),
         GoRoute(path: '/mypage', builder: (context, state) => MyPageScreen()),
       ],

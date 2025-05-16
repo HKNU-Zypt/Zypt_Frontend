@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:camera/camera.dart';
-import 'study_time_screen.dart';
+import 'focus_time_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -16,10 +15,7 @@ class HomeScreen extends StatelessWidget {
             children: [
               const Text(
                 '집중 시간 추적기',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 32),
               ElevatedButton(
@@ -27,7 +23,7 @@ class HomeScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const StudyTimeScreen(),
+                      builder: (context) => const FocusTimeScreen(),
                     ),
                   );
                 },
@@ -42,10 +38,7 @@ class HomeScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: const Text(
-                  '집중 시작',
-                  style: TextStyle(fontSize: 18),
-                ),
+                child: const Text('집중 시작', style: TextStyle(fontSize: 18)),
               ),
             ],
           ),
