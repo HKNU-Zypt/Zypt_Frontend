@@ -11,12 +11,7 @@ final router = GoRouter(
   initialLocation: '/home',
   debugLogDiagnostics: true,
   redirect: (context, state) async {
-    // 로그인 상태에 따라 리다이렉트 처리
-    if (token != null) {
-      // 로그인 상태가 아닐 때
-      return null;
-    }
-    return '/login';
+    return null;
   },
   routes: [
     /// ShellRoute로 바텀 네비게이션이 있는 구조 정의

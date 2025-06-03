@@ -6,7 +6,6 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:focused_study_time_tracker/layout/default_layout.dart';
 import 'package:path_provider/path_provider.dart';
-import '../services/focus_analyzer.dart';
 
 class FocusTimeScreen extends StatefulWidget {
   const FocusTimeScreen({super.key});
@@ -16,13 +15,12 @@ class FocusTimeScreen extends StatefulWidget {
 }
 
 class _FocusTimeScreenState extends State<FocusTimeScreen> {
-  late FocusAnalyzer _focusAnalyzer;
   late CameraController _controller;
   bool _isCameraInitialized = false;
   Timer? _timer;
   bool _isInitialized = false;
   String tempFilePath = "";
-  String _currentLabel = "";
+  final String _currentLabel = "";
 
   @override
   void initState() {
@@ -61,8 +59,6 @@ class _FocusTimeScreenState extends State<FocusTimeScreen> {
 
   Future<void> _initializeFocusAnalyzer() async {
     try {
-      _focusAnalyzer = FocusAnalyzer();
-      await _focusAnalyzer.initialize();
       _isInitialized = true;
     } catch (e) {
       print('Error initializing focus analyzer: $e');
@@ -100,11 +96,7 @@ class _FocusTimeScreenState extends State<FocusTimeScreen> {
         // Process with FocusAnalyzer
         if (_isInitialized) {
           try {
-            final prediction = await _focusAnalyzer.analyzeFocus(imageBytes);
-
-            setState(() {
-              _currentLabel = prediction;
-            });
+            setState(() {});
           } catch (e) {
             print('Error during inference: $e');
           }
