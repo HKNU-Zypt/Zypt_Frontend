@@ -377,7 +377,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/sh\n\n# 1. 루트 디렉터리에 있는 .env 파일 읽기\nENV_FILE=\"$PROJECT_DIR/../.env\"\n\n# 2. .env 파일 존재 여부 확인\nif [ ! -f \"$ENV_FILE\" ]; then\n  echo \".env 파일이 존재하지 않습니다: $ENV_FILE\"\n  exit 1\nfi\n\n# .env 로드 (더 안전한 방식)\nset -o allexport\nsource \"$ENV_FILE\"\nset +o allexport\n\nENV_CONFIG_FILE=\"$PROJECT_DIR/Flutter/EnvConfig.xcconfig\"\n\necho \"// Custom env variables\" > \"$ENV_CONFIG_FILE\"\necho \"KAKAO_NATIVE_APP_KEY=$KAKAO_NATIVE_APP_KEY\" >> \"$ENV_CONFIG_FILE\"\n";
+			shellScript = "#!/bin/sh\n\n# 1. 루트 디렉터리에 있는 .env 파일 읽기\nENV_FILE=\"$PROJECT_DIR/../.env\"\n\n# 2. .env 파일 존재 여부 확인\nif [ ! -f \"$ENV_FILE\" ]; then\n  echo \".env 파일이 존재하지 않습니다: $ENV_FILE\"\n  exit 1\nfi\n\n# .env 로드 (더 안전한 방식)\nset -o allexport\nsource \"$ENV_FILE\"\nset +o allexport\n\nENV_CONFIG_FILE=\"$PROJECT_DIR/Flutter/EnvConfig.xcconfig\"\n\necho \"// Custom env variables\" > \"$ENV_CONFIG_FILE\"\necho \"KAKAO_NATIVE_APP_KEY=$KAKAO_NATIVE_APP_KEY\" >> \"$ENV_CONFIG_FILE\"\necho \"NAVER_CLIENT_ID=$NAVER_CLIENT_ID\" >> \"$ENV_CONFIG_FILE\"\necho \"NAVER_CLIENT_SECRET=$NAVER_CLIENT_SECRET\" >> \"$ENV_CONFIG_FILE\"\necho \"NAVER_APP_NAME=$NAVER_APP_NAME\" >> \"$ENV_CONFIG_FILE\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

@@ -24,11 +24,23 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () {
                 LoginService().loginWithKakao().then((value) {
                   if (value) {
+                    print('[LoginScreen] 카카오 로그인 성공');
                     context.go('/home');
                   }
                 });
               },
               child: const Text('카카오 로그인'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                LoginService().loginWithNaver().then((value) {
+                  if (value) {
+                    print('[LoginScreen] 네이버 로그인 성공');
+                    context.go('/home');
+                  }
+                });
+              },
+              child: const Text('네이버 로그인'),
             ),
             ElevatedButton(
               onPressed: () {

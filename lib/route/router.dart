@@ -1,4 +1,3 @@
-import 'package:focused_study_time_tracker/const.dart';
 import 'package:focused_study_time_tracker/layout/navigation_layout.dart';
 import 'package:focused_study_time_tracker/screens/home_screen.dart';
 import 'package:focused_study_time_tracker/screens/login_screen.dart';

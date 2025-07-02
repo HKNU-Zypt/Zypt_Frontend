@@ -1,4 +1,8 @@
 import 'package:flutter/services.dart';
+import 'package:flutter_naver_login/flutter_naver_login.dart';
+import 'package:flutter_naver_login/interface/types/naver_login_result.dart';
+import 'package:flutter_naver_login/interface/types/naver_login_status.dart';
+import 'package:flutter_naver_login/interface/types/naver_token.dart';
 import 'package:http/http.dart' as http;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
@@ -47,11 +51,24 @@ class LoginService {
 
     if (token != null && token.idToken != null) {
       // 로컬 서버에 idToken 전달하여 자체 토큰 발급
-      await loginWithIdToken('KAKAO', token.idToken!);
-      print('자체 토큰 발급 성공');
-      return true;
+      bool result = await loginWithSocialToken(
+        'KAKAO',
+        token.idToken!,
+        token.refreshToken!,
+      );
+      if (result) {
+        print('FROM KAKAO TO 자체 토큰 발급 성공');
+        // 카카오 로그아웃 처리
+        await UserApi.instance.logout();
+        return true;
+      } else {
+        print('FROM KAKAO TO 자체 토큰 발급 실패');
+        return false;
+      }
+    } else {
+      print('카카오 로그인 실패');
+      return false;
     }
-    return false;
   }
 
   Future<void> loginWithApple() async {
@@ -62,30 +79,69 @@ class LoginService {
     // 구글 로그인 구현 예제
   }
 
-  Future<void> loginWithNaver() async {
+  Future<bool> loginWithNaver() async {
     // 네이버 로그인 구현 예제
+    try {
+      print('네이버 로그인 시도');
+      final NaverLoginResult res = await FlutterNaverLogin.logIn();
+      NaverToken naverToken = await FlutterNaverLogin.getCurrentAccessToken();
+      if (res.status == NaverLoginStatus.loggedIn) {
+        print('네이버 로그인 성공');
+        bool result = await loginWithSocialToken(
+          'NAVER',
+          naverToken.accessToken,
+          naverToken.refreshToken,
+        );
+        if (result) {
+          print('FROM NAVER TO 자체 토큰 발급 성공');
+          // 네이버 로그아웃 처리
+          NaverLoginResult logoutRes =
+              await FlutterNaverLogin.logOutAndDeleteToken();
+          if (logoutRes.status == NaverLoginStatus.loggedOut) {
+            return true;
+          }
+        } else {
+          print('FROM NAVER TO 자체 토큰 발급 실패');
+          return false;
+        }
+      } else {
+        print('네이버 로그인 실패');
+        return false;
+      }
+      return false;
+    } catch (error) {
+      print(error.toString());
+      return false;
+    }
   }
 
-  // 로컬 서버에 idToken 전달하여 자체 토큰 발급
-  Future<void> loginWithIdToken(String type, String idToken) async {
+  // 로컬 서버에 Token 전달하여 자체 토큰 발급
+  Future<bool> loginWithSocialToken(
+    String type,
+    String token,
+    String refreshToken,
+  ) async {
     // 로컬 서버에 idToken 전달하여 자체 토큰 발급
-    print('idToken: $idToken');
+    print('[$type]\nToken: $token \nrefreshToken: $refreshToken');
     //localhost:8080/api/login
 
     // request body
-    // type : KAKAO, GOOGLE, APPLIE, NAVER
+    // type : KAKAO, GOOGLE, NAVER
     // token : 토큰값
 
     final response = await http.post(
       Uri.parse('http://$baseUrl/api/login'),
-      body: {'type': type, 'token': idToken},
+      body: {'type': type, 'token': token, 'refreshToken': refreshToken},
     );
     if (response.statusCode == 200) {
       print('response: ${response.body}');
-      // 발급받은 토큰을 SharedPreferences에 저장
+      // TODO: 발급받은 토큰을 SharedPreferences에 저장
+
+      return true;
     } else {
       print('response: ${response.body}');
+
+      return false;
     }
-    // 발급받은 토큰을 클라이언트에 저장
   }
 }
