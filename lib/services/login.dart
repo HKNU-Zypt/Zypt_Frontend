@@ -3,6 +3,7 @@ import 'package:flutter_naver_login/flutter_naver_login.dart';
 import 'package:flutter_naver_login/interface/types/naver_login_result.dart';
 import 'package:flutter_naver_login/interface/types/naver_login_status.dart';
 import 'package:flutter_naver_login/interface/types/naver_token.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
@@ -75,8 +76,44 @@ class LoginService {
     // 애플 로그인 구현 예제
   }
 
-  Future<void> loginWithGoogle() async {
+  Future<bool> loginWithGoogle() async {
     // 구글 로그인 구현 예제
+    try {
+      // print('구글 로그인 초기화');
+      GoogleSignIn.instance.initialize(
+        serverClientId:
+            "880578430112-3dg028mvc6jn0rsmplc7ln1rfe2bc072.apps.googleusercontent.com",
+      );
+
+      // print('구글 로그인 시도');
+      final GoogleSignInAccount googleUser =
+          await GoogleSignIn.instance.authenticate();
+
+      // 구글 액세스 토큰 발급을 위한 코드
+      // final GoogleSignInClientAuthorization? clientAuth = await googleUser
+      //     .authorizationClient
+      //     .authorizationForScopes(['email', 'profile']);
+      // print('구글 accessToken: ${clientAuth?.accessToken}');
+
+      if (googleUser.authentication.idToken != null) {
+        final idToken = googleUser.authentication.idToken;
+        print('구글 idToken: ${googleUser.authentication.idToken}');
+        bool result = await loginWithSocialToken('GOOGLE', idToken!, null);
+        if (result) {
+          print('FROM GOOGLE TO 자체 토큰 발급 성공');
+          return true;
+        } else {
+          print('FROM GOOGLE TO 자체 토큰 발급 실패');
+          return false;
+        }
+      } else {
+        print('구글 로그인 실패');
+        return false;
+      }
+    } catch (error) {
+      print(error.toString());
+      return false;
+    }
   }
 
   Future<bool> loginWithNaver() async {
@@ -119,7 +156,7 @@ class LoginService {
   Future<bool> loginWithSocialToken(
     String type,
     String token,
-    String refreshToken,
+    String? refreshToken,
   ) async {
     // 로컬 서버에 idToken 전달하여 자체 토큰 발급
     print('[$type]\nToken: $token \nrefreshToken: $refreshToken');
@@ -131,7 +168,13 @@ class LoginService {
 
     final response = await http.post(
       Uri.parse('http://$baseUrl/api/login'),
-      body: {'type': type, 'token': token, 'refreshToken': refreshToken},
+      body: {
+        'type': type,
+        'token': token,
+        // refreshToken이 null이나 빈 문자열이 아닌 경우에만 추가
+        if (refreshToken != null && refreshToken.isNotEmpty)
+          'refreshToken': refreshToken,
+      },
     );
     if (response.statusCode == 200) {
       print('response: ${response.body}');

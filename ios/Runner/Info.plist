@@ -30,6 +30,8 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>kakao${KAKAO_NATIVE_APP_KEY}</string>
+				<!-- Google Login -->
+				<string>com.googleusercontent.apps.880578430112-3i6u0ck247khp866q6q4m4auh2jm085e</string>
 			</array>
 		</dict>
 		<dict>

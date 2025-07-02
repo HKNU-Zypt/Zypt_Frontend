@@ -44,6 +44,17 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             ElevatedButton(
               onPressed: () {
+                LoginService().loginWithGoogle().then((value) {
+                  if (value) {
+                    print('[LoginScreen] 구글 로그인 성공');
+                    context.go('/home');
+                  }
+                });
+              },
+              child: const Text('구글 로그인'),
+            ),
+            ElevatedButton(
+              onPressed: () {
                 context.go('/home');
               },
               child: const Text('홈으로 이동'),

@@ -49,6 +49,7 @@ dependencies:
   http: ^1.2.0
   intl: ^0.19.0
   flutter_naver_login: ^2.1.1
+  google_sign_in: ^7.1.0
 
 dev_dependencies:
   flutter_test:
