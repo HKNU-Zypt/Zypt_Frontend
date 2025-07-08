@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:focused_study_time_tracker/const.dart';
+import 'package:focused_study_time_tracker/services/login.dart';
 import 'package:go_router/go_router.dart';
 
 class MyPageScreen extends StatefulWidget {
@@ -10,10 +10,8 @@ class MyPageScreen extends StatefulWidget {
 }
 
 class _MyPageScreenState extends State<MyPageScreen> {
-  void _logoutWithKakao() async {
-    setState(() {
-      token = null;
-    });
+  void _logout() async {
+    await LoginService().logout();
     context.go('/login');
   }
 
@@ -29,9 +27,17 @@ class _MyPageScreenState extends State<MyPageScreen> {
               'My Page Screen',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
+            ElevatedButton(onPressed: _logout, child: const Text('로그아웃')),
             ElevatedButton(
-              onPressed: _logoutWithKakao,
-              child: const Text('로그아웃'),
+              onPressed: () {
+                LoginService().getAccessToken().then((value) {
+                  print('[LoginScreen] zypt 액세스 토큰: $value');
+                  LoginService().getRefreshToken().then((value) {
+                    print('[LoginScreen] zypt 리프레시 토큰: $value');
+                  });
+                });
+              },
+              child: const Text('zypt token 확인'),
             ),
           ],
         ),

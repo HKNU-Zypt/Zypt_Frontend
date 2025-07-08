@@ -59,6 +59,17 @@ class _LoginScreenState extends State<LoginScreen> {
               },
               child: const Text('홈으로 이동'),
             ),
+            ElevatedButton(
+              onPressed: () {
+                LoginService().getAccessToken().then((value) {
+                  print('[LoginScreen] zypt 액세스 토큰: $value');
+                  LoginService().getRefreshToken().then((value) {
+                    print('[LoginScreen] zypt 리프레시 토큰: $value');
+                  });
+                });
+              },
+              child: const Text('zypt token 확인'),
+            ),
           ],
         ),
       ),
