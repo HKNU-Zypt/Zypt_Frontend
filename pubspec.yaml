@@ -36,11 +36,6 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_dotenv: ^5.2.1
   kakao_flutter_sdk_user: ^1.9.7+3
-  go_router: ^14.8.1
-  camera: ^0.11.1
-  pytorch_lite: ^4.3.2
-  path_provider: ^2.1.1
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
