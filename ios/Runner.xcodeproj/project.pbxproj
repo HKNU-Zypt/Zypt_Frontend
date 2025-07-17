@@ -199,6 +199,7 @@
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				C8ECFB852D953A710031C613 /* ShellScript */,
 				63773A264618FD3AE31ABE5A /* [CP] Embed Pods Frameworks */,
+				38857A6B08730FCAC39EB48C /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -270,6 +271,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		38857A6B08730FCAC39EB48C /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		3B06AD1E1E4923F5004D2608 /* Thin Binary */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -377,7 +395,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/bin/sh\n\n# 1. 루트 디렉터리에 있는 .env 파일 읽기\nENV_FILE=\"$PROJECT_DIR/../.env\"\n\n# 2. .env 파일 존재 여부 확인\nif [ ! -f \"$ENV_FILE\" ]; then\n  echo \".env 파일이 존재하지 않습니다: $ENV_FILE\"\n  exit 1\nfi\n\n# .env 로드 (더 안전한 방식)\nset -o allexport\nsource \"$ENV_FILE\"\nset +o allexport\n\nENV_CONFIG_FILE=\"$PROJECT_DIR/Flutter/EnvConfig.xcconfig\"\n\necho \"// Custom env variables\" > \"$ENV_CONFIG_FILE\"\necho \"KAKAO_NATIVE_APP_KEY=$KAKAO_NATIVE_APP_KEY\" >> \"$ENV_CONFIG_FILE\"\n";
+			shellScript = "#!/bin/sh\n\n# 1. 루트 디렉터리에 있는 .env 파일 읽기\nENV_FILE=\"$PROJECT_DIR/../.env\"\n\n# 2. .env 파일 존재 여부 확인\nif [ ! -f \"$ENV_FILE\" ]; then\n  echo \".env 파일이 존재하지 않습니다: $ENV_FILE\"\n  exit 1\nfi\n\n# .env 로드 (더 안전한 방식)\nset -o allexport\nsource \"$ENV_FILE\"\nset +o allexport\n\nENV_CONFIG_FILE=\"$PROJECT_DIR/Flutter/EnvConfig.xcconfig\"\n\necho \"// Custom env variables\" > \"$ENV_CONFIG_FILE\"\necho \"KAKAO_NATIVE_APP_KEY=$KAKAO_NATIVE_APP_KEY\" >> \"$ENV_CONFIG_FILE\"\necho \"NAVER_CLIENT_ID=$NAVER_CLIENT_ID\" >> \"$ENV_CONFIG_FILE\"\necho \"NAVER_CLIENT_SECRET=$NAVER_CLIENT_SECRET\" >> \"$ENV_CONFIG_FILE\"\necho \"NAVER_APP_NAME=$NAVER_APP_NAME\" >> \"$ENV_CONFIG_FILE\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -459,6 +477,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CONFIGURATION_BUILD_DIR = "$(BUILT_PRODUCTS_DIR)";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -477,6 +496,7 @@
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGET_BUILD_DIR = "$(BUILT_PRODUCTS_DIR)";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Profile;
@@ -487,6 +507,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEVELOPMENT_TEAM = 8A5NG4VN6D;
 				ENABLE_BITCODE = NO;
@@ -497,6 +519,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.fstt.focusedStudyTimeTracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";

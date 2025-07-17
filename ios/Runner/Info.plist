@@ -30,6 +30,16 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>kakao${KAKAO_NATIVE_APP_KEY}</string>
+				<!-- Google Login -->
+				<string>com.googleusercontent.apps.880578430112-3i6u0ck247khp866q6q4m4auh2jm085e</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>thirdpart/fstt</string>
 			</array>
 		</dict>
 	</array>
@@ -40,6 +50,8 @@
 		<string>kakaokompassauth</string>
 		<string>kakaolink</string>
 		<string>kakaoplus</string>
+		<string>naversearchapp</string>
+		<string>naversearchthirdlogin</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
@@ -62,5 +74,21 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+    <key>NSCameraUsageDescription</key>
+    <string>이 앱은 공부 시간을 추적하기 위해 카메라를 사용합니다.</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>이 앱은 공부 환경을 분석하기 위해 사진을 저장합니다.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>이 앱은 오디오 스트리밍 및 음성 채팅을 위해 마이크 접근 권한이 필요합니다.</string>
+	
+	<key>NidUrlScheme</key>
+	<string>thirdpart/fstt</string>
+	<key>NidClientID</key>
+	<string>${NAVER_CLIENT_ID}</string>
+	<key>NidClientSecret</key>
+	<string>${NAVER_CLIENT_SECRET}</string>
+	<key>NidAppName</key>
+	<string>${NAVER_APP_NAME}</string>
 </dict>
+
 </plist>

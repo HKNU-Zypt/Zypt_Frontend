@@ -48,6 +48,19 @@ android {
             throw GradleException("KAKAO_NATIVE_APP_KEY not found in .env file")
         }
         manifestPlaceholders["YOUR_NATIVE_APP_KEY"] = kakaoKey
+
+        // 네이버 로그인 환경변수 설정
+        val naverClientId = dotenv["NAVER_CLIENT_ID"] as String?
+        val naverClientSecret = dotenv["NAVER_CLIENT_SECRET"] as String?
+        val naverAppName = dotenv["NAVER_APP_NAME"] as String?
+        
+        if (naverClientId == null || naverClientSecret == null || naverAppName == null) {
+            throw GradleException("NAVER_CLIENT_ID, NAVER_CLIENT_SECRET, NAVER_APP_NAME not found in .env file")
+        }
+        
+        resValue("string", "client_id", naverClientId)
+        resValue("string", "client_secret", naverClientSecret)
+        resValue("string", "client_name", naverAppName)
     }
 
     buildTypes {
