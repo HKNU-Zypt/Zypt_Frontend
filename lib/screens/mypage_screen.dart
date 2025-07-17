@@ -39,6 +39,14 @@ class _MyPageScreenState extends State<MyPageScreen> {
               },
               child: const Text('zypt token 확인'),
             ),
+            ElevatedButton(
+              onPressed: () {
+                LoginService().refreshAccessToken().then((value) {
+                  print('[LoginScreen] 토큰 갱신 결과: $value');
+                });
+              },
+              child: const Text('토큰 갱신'),
+            ),
           ],
         ),
       ),

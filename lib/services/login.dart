@@ -14,9 +14,11 @@ class LoginService {
   factory LoginService() => _instance;
   LoginService._internal();
   // 안드로이드 용 baseUrl
-  String baseUrl = '10.0.2.2:8080';
+  // String baseUrl = '10.0.2.2:8080';
   // iOS 용 baseUrl
   // String baseUrl = '127.0.0.1:8080';
+  // S10 용 baseUrl (노트북 사설 ip)
+  String baseUrl = '192.168.45.175:8080';
 
   Future<bool> loginWithKakao() async {
     OAuthToken? token;
@@ -195,7 +197,10 @@ class LoginService {
       print('zyptAccessToken: $zyptAccessToken');
 
       // 발급받은 토큰을 SharedPreferences에 저장
-      await _saveTokens(zyptAccessToken, zyptRefreshToken);
+      await _saveTokens(
+        accessToken: zyptAccessToken,
+        refreshToken: zyptRefreshToken,
+      );
 
       return true;
     } else {
@@ -206,10 +211,16 @@ class LoginService {
   }
 
   // 토큰을 SharedPreferences에 저장
-  Future<void> _saveTokens(String accessToken, String refreshToken) async {
+  Future<void> _saveTokens({String? accessToken, String? refreshToken}) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('access_token', accessToken);
-    await prefs.setString('refresh_token', refreshToken);
+    if (accessToken != null && accessToken.isNotEmpty) {
+      accessToken = accessToken.replaceAll('Bearer ', '');
+      await prefs.setString('access_token', accessToken);
+    }
+    if (refreshToken != null && refreshToken.isNotEmpty) {
+      refreshToken = refreshToken.replaceAll('Bearer ', '');
+      await prefs.setString('refresh_token', refreshToken);
+    }
     print('토큰이 저장되었습니다.');
   }
 
@@ -237,5 +248,28 @@ class LoginService {
     await prefs.remove('access_token');
     await prefs.remove('refresh_token');
     print('로그아웃되었습니다.');
+  }
+
+  Future<bool> refreshAccessToken() async {
+    final refreshToken = await getRefreshToken();
+    try {
+      final response = await http.post(
+        Uri.parse('http://$baseUrl/api/auth/refresh'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'refreshToken': refreshToken}),
+      );
+      if (response.statusCode == 200) {
+        String? newAccessToken = response.headers['authorization'];
+
+        if (newAccessToken != null && newAccessToken.isNotEmpty) {
+          await _saveTokens(accessToken: newAccessToken);
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      print('토큰 갱신 실패: $e');
+      return false;
+    }
   }
 }
