@@ -3,22 +3,28 @@ import 'package:flutter_naver_login/flutter_naver_login.dart';
 import 'package:flutter_naver_login/interface/types/naver_login_result.dart';
 import 'package:flutter_naver_login/interface/types/naver_login_status.dart';
 import 'package:flutter_naver_login/interface/types/naver_token.dart';
+import 'package:focused_study_time_tracker/const.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:focused_study_time_tracker/models/user.dart' as app_user;
+import 'package:focused_study_time_tracker/services/user_service.dart';
 import 'dart:convert';
 
 class LoginService {
   static final LoginService _instance = LoginService._internal();
   factory LoginService() => _instance;
   LoginService._internal();
-  // 안드로이드 용 baseUrl
-  // String baseUrl = '10.0.2.2:8080';
-  // iOS 용 baseUrl
-  // String baseUrl = '127.0.0.1:8080';
-  // S10 용 baseUrl (노트북 사설 ip)
-  String baseUrl = '192.168.45.175:8080';
+
+  // SharedPreferences 인스턴스를 클래스 레벨에서 관리
+  SharedPreferences? _prefs;
+
+  // SharedPreferences 인스턴스 초기화
+  Future<SharedPreferences> get prefs async {
+    _prefs ??= await SharedPreferences.getInstance();
+    return _prefs!;
+  }
 
   Future<bool> loginWithKakao() async {
     OAuthToken? token;
@@ -212,28 +218,28 @@ class LoginService {
 
   // 토큰을 SharedPreferences에 저장
   Future<void> _saveTokens({String? accessToken, String? refreshToken}) async {
-    final prefs = await SharedPreferences.getInstance();
+    final prefsInstance = await prefs;
     if (accessToken != null && accessToken.isNotEmpty) {
       accessToken = accessToken.replaceAll('Bearer ', '');
-      await prefs.setString('access_token', accessToken);
+      await prefsInstance.setString('access_token', accessToken);
     }
     if (refreshToken != null && refreshToken.isNotEmpty) {
       refreshToken = refreshToken.replaceAll('Bearer ', '');
-      await prefs.setString('refresh_token', refreshToken);
+      await prefsInstance.setString('refresh_token', refreshToken);
     }
     print('토큰이 저장되었습니다.');
   }
 
   // 저장된 액세스 토큰 가져오기
   Future<String?> getAccessToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('access_token');
+    final prefsInstance = await prefs;
+    return prefsInstance.getString('access_token');
   }
 
   // 저장된 리프레시 토큰 가져오기
   Future<String?> getRefreshToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('refresh_token');
+    final prefsInstance = await prefs;
+    return prefsInstance.getString('refresh_token');
   }
 
   // 로그인 상태 확인 (토큰이 존재하는지)
@@ -243,11 +249,40 @@ class LoginService {
   }
 
   // 로그아웃 (토큰 삭제)
-  Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('access_token');
-    await prefs.remove('refresh_token');
-    print('로그아웃되었습니다.');
+  Future<bool> logout() async {
+    final prefsInstance = await prefs;
+    final accessToken = await getAccessToken();
+    await prefsInstance.remove('access_token');
+    await prefsInstance.remove('refresh_token');
+
+    // UserService에서 사용자 정보 삭제
+    try {
+      await UserService().clearUser();
+      print('사용자 정보가 삭제되었습니다.');
+    } catch (e) {
+      print('사용자 정보 삭제 실패: $e');
+    }
+
+    print('zypt accessToken 확인: $accessToken');
+    try {
+      final response = await http.post(
+        Uri.parse('http://$baseUrl/api/auth/logout'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+      if (response.statusCode == 200) {
+        print('zypt response: ${response.body}');
+        print('zypt 로그아웃되었습니다.');
+        return true;
+      } else {
+        print('zypt response statusCode: ${response.statusCode}');
+        print('zypt response: ${response.body}');
+        print('zypt 로그아웃 실패');
+        return false;
+      }
+    } catch (e) {
+      print('토큰 갱신 실패: $e');
+      return false;
+    }
   }
 
   Future<bool> refreshAccessToken() async {
@@ -269,6 +304,35 @@ class LoginService {
       return false;
     } catch (e) {
       print('토큰 갱신 실패: $e');
+      return false;
+    }
+  }
+
+  //회원탈퇴
+  Future<bool> withdraw() async {
+    final accessToken = await getAccessToken();
+    final refreshToken = await getRefreshToken();
+
+    final url = Uri.parse('http://$baseUrl/api/auth');
+    final request = http.Request("DELETE", url);
+    request.headers.addAll({
+      'Authorization': 'Bearer $accessToken',
+      'Content-Type': 'application/json',
+    });
+    request.body = jsonEncode({'refreshToken': refreshToken});
+
+    final response = await http.Client().send(request);
+
+    if (response.statusCode == 200) {
+      final prefsInstance = await prefs;
+      await prefsInstance.remove('access_token');
+      await prefsInstance.remove('refresh_token');
+      await UserService().clearUser();
+
+      print('zypt 회원탈퇴 성공');
+      return true;
+    } else {
+      print('zypt 회원탈퇴 실패');
       return false;
     }
   }

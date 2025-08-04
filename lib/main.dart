@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:focused_study_time_tracker/route/router.dart';
+import 'package:focused_study_time_tracker/services/user_service.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 void main() async {
@@ -12,6 +13,10 @@ void main() async {
     nativeAppKey: dotenv.env['KAKAO_NATIVE_APP_KEY']!,
     javaScriptAppKey: dotenv.env['KAKAO_JAVASCRIPT_APP_KEY']!,
   );
+
+  // UserService 초기화
+  await UserService().initialize();
+
   runApp(MyApp());
 }
 

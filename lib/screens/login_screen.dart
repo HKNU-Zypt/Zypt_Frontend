@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 LoginService().loginWithKakao().then((value) {
                   if (value) {
                     print('[LoginScreen] 카카오 로그인 성공');
-                    context.go('/home');
+                    context.go('/nickname');
                   }
                 });
               },
@@ -36,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 LoginService().loginWithNaver().then((value) {
                   if (value) {
                     print('[LoginScreen] 네이버 로그인 성공');
-                    context.go('/home');
+                    context.go('/nickname');
                   }
                 });
               },
@@ -47,11 +47,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 LoginService().loginWithGoogle().then((value) {
                   if (value) {
                     print('[LoginScreen] 구글 로그인 성공');
-                    context.go('/home');
+                    context.go('/nickname');
                   }
                 });
               },
               child: const Text('구글 로그인'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                context.go('/nickname');
+              },
+              child: const Text('닉네임 설정'),
             ),
             ElevatedButton(
               onPressed: () {
