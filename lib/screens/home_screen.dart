@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:focused_study_time_tracker/screens/focus_time_screen_v2.dart';
+import 'package:focused_study_time_tracker/screens/focus_time_screen.dart';
 import 'package:focused_study_time_tracker/services/user_service.dart';
-import 'focus_time_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -75,38 +74,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         const SizedBox(height: 32),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const FocusTimeScreen(),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 48,
-                              vertical: 16,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          child: const Text(
-                            '집중 시작',
-                            style: TextStyle(fontSize: 18),
-                          ),
-                        ),
+                        // FocusTimeScreen 제거에 따라 버튼도 제거
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const CameraFocusPage(),
+                                builder: (context) => const FocusTimeScreen(),
                               ),
                             );
                           },
