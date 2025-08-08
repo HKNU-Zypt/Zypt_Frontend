@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focused_study_time_tracker/screens/focus_time_screen_v2.dart';
 import 'package:focused_study_time_tracker/services/user_service.dart';
 import 'focus_time_screen.dart';
 
@@ -96,6 +97,21 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           child: const Text(
                             '집중 시작',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const CameraFocusPage(),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            '집중 시작 v2',
                             style: TextStyle(fontSize: 18),
                           ),
                         ),
