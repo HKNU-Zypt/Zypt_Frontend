@@ -25,7 +25,6 @@ class FocusAnalyzerService {
     required double previewWidth,
     required double previewHeight,
   }) async {
-    print('zypt analyze');
     if (!_isInitialized || _faceMeshDetector == null || _interpreter == null) {
       throw StateError('FocusAnalyzerService is not initialized');
     }
@@ -54,9 +53,8 @@ class FocusAnalyzerService {
       final input = [transposed]; // [1, 2, 468]
       final output = List.generate(1, (_) => List.filled(3, 0.0)); // [1,3]
 
-      print('zypt input: $input');
       _interpreter!.run(input, output);
-      print('zypt output: $output');
+
       final List<String> labels = ['집중', '집중안함', '졸음'];
       int maxIdx = 0;
       double maxVal = output[0][0];

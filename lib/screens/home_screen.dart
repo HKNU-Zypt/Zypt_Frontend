@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:focused_study_time_tracker/screens/focus_time_screen.dart';
 import 'package:focused_study_time_tracker/services/user_service.dart';
 
@@ -89,6 +90,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             '집중 시작 v2',
                             style: TextStyle(fontSize: 18),
                           ),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: () => context.push('/focus-test'),
+                          child: const Text('Focus API 테스트 페이지'),
                         ),
                       ],
                     ),

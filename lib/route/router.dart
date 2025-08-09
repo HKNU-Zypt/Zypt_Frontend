@@ -1,5 +1,6 @@
 import 'package:focused_study_time_tracker/layout/navigation_layout.dart';
 import 'package:focused_study_time_tracker/screens/home_screen.dart';
+import 'package:focused_study_time_tracker/screens/focus_time_test_screen.dart';
 import 'package:focused_study_time_tracker/screens/login_screen.dart';
 import 'package:focused_study_time_tracker/screens/mypage_screen.dart';
 import 'package:focused_study_time_tracker/screens/nick_name_screen.dart';
@@ -36,5 +37,9 @@ final router = GoRouter(
     // 로그인 같은 바텀네비 없는 화면은 ShellRoute 밖에 정의
     GoRoute(path: '/login', builder: (context, state) => LoginScreen()),
     GoRoute(path: '/nickname', builder: (context, state) => NickNameScreen()),
+    GoRoute(
+      path: '/focus-test',
+      builder: (context, state) => const FocusTimeTestScreen(),
+    ),
   ],
 );
