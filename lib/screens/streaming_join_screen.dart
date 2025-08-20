@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:focused_study_time_tracker/layout/default_layout.dart';
 import 'package:focused_study_time_tracker/models/study_room.dart';
 import 'package:focused_study_time_tracker/screens/streaming_screen.dart';
+import 'package:focused_study_time_tracker/services/livekit.dart';
 import 'package:intl/intl.dart';
 
 class StreamingJoinScreen extends StatefulWidget {
@@ -12,7 +13,8 @@ class StreamingJoinScreen extends StatefulWidget {
 }
 
 class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
-  final List<StudyRoom> _rooms = []; // TODO: 실제 서버에서 방 목록을 가져와야 합니다
+  final LiveKitService _liveKitService = LiveKitService();
+  final List<StudyRoom> _rooms = [];
   bool _isLoading = false;
 
   @override
@@ -24,25 +26,22 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
   Future<void> _loadRooms() async {
     setState(() => _isLoading = true);
     try {
-      // TODO: 실제 서버 API 호출로 대체
-      await Future.delayed(const Duration(seconds: 1));
+      final rooms = await _liveKitService.fetchAllRooms();
       setState(() {
-        _rooms.addAll([
-          StudyRoom(
-            id: '1',
-            name: '열심히 공부하는 방',
-            hostName: '김철수',
-            participantCount: 3,
-            createdAt: DateTime.now().subtract(const Duration(hours: 1)),
-          ),
-          StudyRoom(
-            id: '2',
-            name: '프로그래밍 스터디',
-            hostName: '이영희',
-            participantCount: 2,
-            createdAt: DateTime.now().subtract(const Duration(minutes: 30)),
-          ),
-        ]);
+        _rooms
+          ..clear()
+          ..addAll(
+            (rooms ?? []).map((e) {
+              // 백엔드 DTO: roomName, roomId, emptyTimeOut, maxParticipants, numParticipants
+              return StudyRoom(
+                id: e['roomId']?.toString() ?? e['roomName'] as String,
+                name: e['roomName'] as String,
+                hostName: '호스트', // 서버에서 호스트 정보는 제공되지 않음
+                participantCount: (e['numParticipants'] as num?)?.toInt() ?? 0,
+                createdAt: DateTime.now(), // 생성 시간 정보가 없어 현재 시간으로 대체
+              );
+            }),
+          );
       });
     } catch (e) {
       if (mounted) {
@@ -64,29 +63,28 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
     );
 
     if (result != null && mounted) {
-      // TODO: 실제 서버 API 호출로 대체
-      final newRoom = StudyRoom(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: result['name']!,
-        hostName: result['hostName']!,
-        participantCount: 1,
-        createdAt: DateTime.now(),
-      );
-
-      setState(() => _rooms.insert(0, newRoom));
-
-      // 새로 생성한 방으로 바로 입장
-      if (mounted) {
+      final roomName = result['name']!;
+      final hostName = result['hostName']!;
+      try {
+        // LiveKit 초기화 후 서버에 방 생성 요청 및 즉시 연결
+        await _liveKitService.initialize();
+        await _liveKitService.createAndConnect(roomName);
+        if (!mounted) return;
         Navigator.push(
           context,
           MaterialPageRoute(
             builder:
                 (context) => StreamingScreen(
-                  roomName: newRoom.id,
-                  participantName: newRoom.hostName,
+                  roomName: roomName,
+                  participantName: hostName,
                 ),
           ),
         );
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('방 생성/입장 실패: $e')));
       }
     }
   }
@@ -121,18 +119,31 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
                             final room = _rooms[index];
                             return _RoomCard(
                               room: room,
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) => StreamingScreen(
-                                          roomName: room.id,
-                                          participantName:
-                                              '참가자', // TODO: 실제 사용자 이름으로 대체
-                                        ),
-                                  ),
-                                );
+                              onTap: () async {
+                                try {
+                                  await _liveKitService.initialize();
+                                  await _liveKitService.connect(
+                                    room.name,
+                                    '참가자',
+                                  );
+                                  if (!mounted) return;
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => StreamingScreen(
+                                            roomName: room.name,
+                                            participantName: '참가자',
+                                          ),
+                                    ),
+                                  );
+                                } catch (e) {
+                                  print(e);
+                                  if (!mounted) return;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('입장 실패: $e')),
+                                  );
+                                }
                               },
                             );
                           },

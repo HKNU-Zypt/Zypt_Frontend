@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:livekit_client/livekit_client.dart';
 import 'package:http/http.dart' as http;
-import 'dart:io';
+import 'package:focused_study_time_tracker/const.dart';
+import 'package:focused_study_time_tracker/services/login.dart';
 
 class LiveKitService {
   static final LiveKitService _instance = LiveKitService._internal();
@@ -13,6 +15,9 @@ class LiveKitService {
   String? _wsUrl;
   LocalVideoTrack? _videoTrack;
   LocalAudioTrack? _audioTrack;
+  final LoginService _loginService = LoginService();
+
+  bool get isRoomInitialized => _room != null;
 
   Future<void> initialize() async {
     _wsUrl = dotenv.env['LIVEKIT_URL'];
@@ -21,37 +26,77 @@ class LiveKitService {
     }
   }
 
-  String getServerUrl(String roomName, String participantName) {
-    //TODO: 실제 기기에서는 PC의 IP로 바꿔주세요! WIFI 달라질 떄마다 바꿔줘야함
-    const pcIp = '192.168.0.19'; // 여기에 PC의 실제 IP 입력
-
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:8080/getToken?room=$roomName&identity=$participantName';
-    } else if (Platform.isIOS) {
-      return 'http://$pcIp:8080/getToken?room=$roomName&identity=$participantName';
-    } else {
-      return 'http://localhost:8080/getToken?room=$roomName&identity=$participantName';
+  Future<Map<String, String>> _authHeaders() async {
+    final accessToken = await _loginService.getAccessToken();
+    if (accessToken == null || accessToken.isEmpty) {
+      throw Exception('인증 토큰이 없습니다. 먼저 로그인 해주세요.');
     }
+    return {
+      'Authorization': 'Bearer $accessToken',
+      'Content-Type': 'application/json',
+    };
   }
 
-  Future<String> _getTokenFromServer(
-    String roomName,
-    String participantName,
+  Future<http.Response> _authorizedRequest(
+    Future<http.Response> Function() requestFn,
   ) async {
-    final response = await http.get(
-      Uri.parse(getServerUrl(roomName, participantName)),
+    http.Response response = await requestFn();
+    if (response.statusCode == 401) {
+      final refreshed = await _loginService.refreshAccessToken();
+      if (refreshed) {
+        response = await requestFn();
+      }
+    }
+    return response;
+  }
+
+  Future<String> _createRoomAndGetToken(
+    String roomName, {
+    int maxParticipant = 10,
+  }) async {
+    final headers = await _authHeaders();
+    final uri = Uri.parse('http://$baseUrl/api/rooms/create').replace(
+      queryParameters: {
+        'roomName': roomName,
+        'maxParticipant': maxParticipant.toString(),
+      },
     );
 
+    final response = await _authorizedRequest(
+      () => http.post(uri, headers: headers),
+    );
     if (response.statusCode == 200) {
-      return response.body;
-    } else {
-      throw Exception('토큰 발급 실패: ${response.statusCode}');
+      final Map<String, dynamic> jsonBody = json.decode(
+        utf8.decode(response.bodyBytes),
+      );
+      final String livekitAccessToken =
+          jsonBody['livekitAccessToken'] as String;
+      return livekitAccessToken;
     }
+    throw Exception('방 생성/토큰 발급 실패: ${response.statusCode} ${response.body}');
+  }
+
+  Future<String> _joinRoomAndGetToken(String roomName) async {
+    final headers = await _authHeaders();
+    final uri = Uri.parse('http://$baseUrl/api/rooms/$roomName');
+    final response = await _authorizedRequest(
+      () => http.post(uri, headers: headers),
+    );
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonBody = json.decode(
+        utf8.decode(response.bodyBytes),
+      );
+      final String livekitAccessToken =
+          jsonBody['livekitAccessToken'] as String;
+      return livekitAccessToken;
+    }
+    throw Exception('룸 참여/토큰 발급 실패: ${response.statusCode} ${response.body}');
   }
 
   Future<void> connect(String roomName, String participantName) async {
     try {
-      _token = await _getTokenFromServer(roomName, participantName);
+      // 백엔드에서 닉네임/식별자는 액세스 토큰으로 파생되므로 participantName은 서버에 전달하지 않습니다.
+      _token = await _joinRoomAndGetToken(roomName);
       _room = Room();
 
       if (_wsUrl == null || _token == null) {
@@ -62,6 +107,40 @@ class LiveKitService {
     } catch (e) {
       _room = null;
       throw Exception('LiveKit 방 연결 실패: $e');
+    }
+  }
+
+  Future<void> createAndConnect(
+    String roomName, {
+    int maxParticipant = 10,
+  }) async {
+    try {
+      _token = await _createRoomAndGetToken(
+        roomName,
+        maxParticipant: maxParticipant,
+      );
+      _room = Room();
+
+      if (_wsUrl == null || _token == null) {
+        throw Exception('LiveKit URL or token is not initialized');
+      }
+
+      await _room!.connect(_wsUrl!, _token!);
+    } catch (e) {
+      _room = null;
+      throw Exception('LiveKit 방 생성/연결 실패: $e');
+    }
+  }
+
+  // 방만 생성(백엔드에 방 생성 요청)하고 연결은 하지 않습니다.
+  Future<void> createRoomOnServer(
+    String roomName, {
+    int maxParticipant = 10,
+  }) async {
+    try {
+      await _createRoomAndGetToken(roomName, maxParticipant: maxParticipant);
+    } catch (e) {
+      throw Exception('LiveKit 방 생성 실패: $e');
     }
   }
 
@@ -134,5 +213,46 @@ class LiveKitService {
   Future<void> unpublishAll() async {
     await unpublishVideo();
     await unpublishAudio();
+  }
+
+  // ====== 추가: 룸/참가자 조회 및 삭제 ======
+  Future<List<Map<String, dynamic>>?> fetchAllRooms() async {
+    final headers = await _authHeaders();
+    final uri = Uri.parse('http://$baseUrl/api/rooms');
+    final response = await _authorizedRequest(
+      () => http.get(uri, headers: headers),
+    );
+    if (response.statusCode == 200) {
+      final List<dynamic> list = json.decode(utf8.decode(response.bodyBytes));
+      return list.cast<Map<String, dynamic>>();
+    }
+    if (response.statusCode == 204) {
+      return [];
+    }
+    throw Exception('전체 룸 조회 실패: ${response.statusCode} ${response.body}');
+  }
+
+  Future<List<Map<String, dynamic>>> fetchParticipants(String roomName) async {
+    final headers = await _authHeaders();
+    final uri = Uri.parse('http://$baseUrl/api/rooms/$roomName/participant');
+    final response = await _authorizedRequest(
+      () => http.get(uri, headers: headers),
+    );
+    if (response.statusCode == 200) {
+      final List<dynamic> list = json.decode(utf8.decode(response.bodyBytes));
+      return list.cast<Map<String, dynamic>>();
+    }
+    throw Exception('참가자 조회 실패: ${response.statusCode} ${response.body}');
+  }
+
+  Future<void> deleteRoom(String roomName) async {
+    final headers = await _authHeaders();
+    final uri = Uri.parse('http://$baseUrl/api/rooms/$roomName');
+    final response = await _authorizedRequest(
+      () => http.delete(uri, headers: headers),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('룸 삭제 실패: ${response.statusCode} ${response.body}');
+    }
   }
 }

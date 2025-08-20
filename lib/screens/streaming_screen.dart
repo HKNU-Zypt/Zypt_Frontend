@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:focused_study_time_tracker/layout/default_layout.dart';
 import 'package:focused_study_time_tracker/services/livekit.dart';
@@ -20,6 +21,12 @@ class StreamingScreen extends StatefulWidget {
 class _StreamingScreenState extends State<StreamingScreen> {
   final LiveKitService _liveKitService = LiveKitService();
   bool _isConnecting = false;
+  bool _isDisposed = false;
+  Timer? _rebuildTimer;
+  final Duration _rebuildDebounce = const Duration(milliseconds: 120);
+
+  lk.LocalParticipant? _localParticipant;
+  List<lk.RemoteParticipant> _remoteParticipants = const [];
 
   @override
   void initState() {
@@ -28,19 +35,38 @@ class _StreamingScreenState extends State<StreamingScreen> {
   }
 
   void _onRoomDidUpdate() {
-    if (mounted) {
-      setState(() {});
+    _refreshParticipants();
+    _scheduleRebuild();
+  }
+
+  void _refreshParticipants() {
+    if (_liveKitService.isRoomInitialized) {
+      _localParticipant = _liveKitService.room.localParticipant;
+      _remoteParticipants =
+          _liveKitService.room.remoteParticipants.values.toList();
     }
+  }
+
+  void _scheduleRebuild() {
+    if (!mounted || _isDisposed) return;
+    _rebuildTimer?.cancel();
+    _rebuildTimer = Timer(_rebuildDebounce, () {
+      if (!mounted || _isDisposed) return;
+      setState(() {});
+    });
   }
 
   Future<void> _initializeLiveKit() async {
     setState(() => _isConnecting = true);
     try {
       await _liveKitService.initialize();
-      await _liveKitService.connect(widget.roomName, widget.participantName);
+      if (!_liveKitService.isRoomInitialized) {
+        await _liveKitService.connect(widget.roomName, widget.participantName);
+      }
       _liveKitService.room.addListener(_onRoomDidUpdate);
       await _liveKitService.publishVideo();
       await _liveKitService.publishAudio();
+      _refreshParticipants();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -57,6 +83,8 @@ class _StreamingScreenState extends State<StreamingScreen> {
 
   @override
   void dispose() {
+    _isDisposed = true;
+    _rebuildTimer?.cancel();
     _liveKitService.room.removeListener(_onRoomDidUpdate);
     _liveKitService.disconnect();
     super.dispose();
@@ -111,9 +139,8 @@ class _StreamingScreenState extends State<StreamingScreen> {
   Widget _buildParticipantGrid() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final localParticipant = _liveKitService.room.localParticipant;
-        final remoteParticipants =
-            _liveKitService.room.remoteParticipants.values.toList();
+        final localParticipant = _localParticipant;
+        final remoteParticipants = _remoteParticipants;
         final allParticipants = [
           if (localParticipant != null) localParticipant,
           ...remoteParticipants,
@@ -146,9 +173,14 @@ class _StreamingScreenState extends State<StreamingScreen> {
           itemCount: allParticipants.length,
           itemBuilder: (context, index) {
             final participant = allParticipants[index];
-            return participant is lk.LocalParticipant
-                ? _buildLocalParticipantView(participant)
-                : _buildParticipantView(participant as lk.RemoteParticipant);
+            return RepaintBoundary(
+              child:
+                  participant is lk.LocalParticipant
+                      ? _buildLocalParticipantView(participant)
+                      : _buildParticipantView(
+                        participant as lk.RemoteParticipant,
+                      ),
+            );
           },
         );
       },
@@ -228,7 +260,9 @@ class _StreamingScreenState extends State<StreamingScreen> {
             left: 8,
             bottom: 8,
             child: Text(
-              participant.name ?? participant.identity,
+              participant.name.isNotEmpty
+                  ? participant.name
+                  : participant.identity,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
