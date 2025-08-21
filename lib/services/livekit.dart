@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:livekit_client/livekit_client.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:focused_study_time_tracker/const.dart';
 import 'package:focused_study_time_tracker/services/login.dart';
@@ -13,9 +14,21 @@ class LiveKitService {
   Room? _room;
   String? _token;
   String? _wsUrl;
-  LocalVideoTrack? _videoTrack;
-  LocalAudioTrack? _audioTrack;
   final LoginService _loginService = LoginService();
+  VoidCallback? _roomListener;
+  bool _useFrontCamera = true;
+
+  // 참가자/미디어/연결 상태 브로드캐스트
+  final ValueNotifier<ParticipantsState> participantsStateNotifier =
+      ValueNotifier<ParticipantsState>(
+        const ParticipantsState(localParticipant: null, remoteParticipants: []),
+      );
+  final ValueNotifier<bool> cameraEnabledNotifier = ValueNotifier<bool>(false);
+  final ValueNotifier<bool> microphoneEnabledNotifier = ValueNotifier<bool>(
+    false,
+  );
+  final ValueNotifier<ConnectionState> connectionStateNotifier =
+      ValueNotifier<ConnectionState>(ConnectionState.disconnected);
 
   bool get isRoomInitialized => _room != null;
 
@@ -104,6 +117,8 @@ class LiveKitService {
       }
 
       await _room!.connect(_wsUrl!, _token!);
+      _attachRoomListener();
+      _emitState();
     } catch (e) {
       _room = null;
       throw Exception('LiveKit 방 연결 실패: $e');
@@ -126,6 +141,8 @@ class LiveKitService {
       }
 
       await _room!.connect(_wsUrl!, _token!);
+      _attachRoomListener();
+      _emitState();
     } catch (e) {
       _room = null;
       throw Exception('LiveKit 방 생성/연결 실패: $e');
@@ -147,9 +164,21 @@ class LiveKitService {
   Future<void> disconnect() async {
     if (_room != null) {
       await unpublishAll();
+      if (_roomListener != null) {
+        _room!.removeListener(_roomListener!);
+        _roomListener = null;
+      }
       await _room!.disconnect();
       _room = null;
     }
+    // 상태 초기화
+    participantsStateNotifier.value = const ParticipantsState(
+      localParticipant: null,
+      remoteParticipants: [],
+    );
+    cameraEnabledNotifier.value = false;
+    microphoneEnabledNotifier.value = false;
+    connectionStateNotifier.value = ConnectionState.disconnected;
   }
 
   Room get room {
@@ -170,11 +199,15 @@ class LiveKitService {
     }
 
     try {
-      if (_videoTrack != null) {
-        await unpublishVideo();
-      }
-      _videoTrack = await LocalVideoTrack.createCameraTrack();
-      await _room!.localParticipant!.publishVideoTrack(_videoTrack!);
+      // LiveKit 권장 방식: 카메라 퍼블리시/언퍼블리시 토글
+      await _room!.localParticipant!.setCameraEnabled(
+        true,
+        cameraCaptureOptions: CameraCaptureOptions(
+          cameraPosition:
+              _useFrontCamera ? CameraPosition.front : CameraPosition.back,
+        ),
+      );
+      cameraEnabledNotifier.value = true;
     } catch (e) {
       throw Exception('Failed to publish video: $e');
     }
@@ -186,33 +219,112 @@ class LiveKitService {
     }
 
     try {
-      if (_audioTrack != null) {
-        await unpublishAudio();
-      }
-      _audioTrack = await LocalAudioTrack.create();
-      await _room!.localParticipant!.publishAudioTrack(_audioTrack!);
+      // LiveKit 권장 방식: 마이크 퍼블리시/언퍼블리시 토글
+      await _room!.localParticipant!.setMicrophoneEnabled(true);
+      microphoneEnabledNotifier.value = true;
     } catch (e) {
       throw Exception('Failed to publish audio: $e');
     }
   }
 
   Future<void> unpublishVideo() async {
-    if (_videoTrack != null) {
-      await _videoTrack!.stop();
-      _videoTrack = null;
+    if (_room?.localParticipant != null) {
+      await _room!.localParticipant!.setCameraEnabled(false);
+      cameraEnabledNotifier.value = false;
     }
   }
 
   Future<void> unpublishAudio() async {
-    if (_audioTrack != null) {
-      await _audioTrack!.stop();
-      _audioTrack = null;
+    if (_room?.localParticipant != null) {
+      await _room!.localParticipant!.setMicrophoneEnabled(false);
+      microphoneEnabledNotifier.value = false;
     }
   }
 
   Future<void> unpublishAll() async {
     await unpublishVideo();
     await unpublishAudio();
+  }
+
+  // 권한 보장(1차: 최소 구현 - 플랫폼 기본 권한 요청 흐름에 위임)
+  Future<void> ensurePermissions() async {
+    // 추후 permission_handler 또는 SDK 내 권한 유틸을 연동할 수 있습니다.
+    // 현재 단계에서는 setCameraEnabled/setMicrophoneEnabled 호출 시
+    // 플랫폼 권한 프롬프트에 위임합니다.
+    return;
+  }
+
+  // --- 편의 API ---
+  bool get isCameraEnabled => cameraEnabledNotifier.value;
+  bool get isMicrophoneEnabled => microphoneEnabledNotifier.value;
+
+  Future<void> setCameraEnabled(bool enabled) async {
+    if (_room?.localParticipant == null) {
+      throw Exception('Room is not initialized. Call connect() first.');
+    }
+    await _room!.localParticipant!.setCameraEnabled(
+      enabled,
+      cameraCaptureOptions:
+          enabled
+              ? CameraCaptureOptions(
+                cameraPosition:
+                    _useFrontCamera
+                        ? CameraPosition.front
+                        : CameraPosition.back,
+              )
+              : null,
+    );
+    cameraEnabledNotifier.value = enabled;
+  }
+
+  Future<void> setMicrophoneEnabled(bool enabled) async {
+    if (_room?.localParticipant == null) {
+      throw Exception('Room is not initialized. Call connect() first.');
+    }
+    await _room!.localParticipant!.setMicrophoneEnabled(enabled);
+    microphoneEnabledNotifier.value = enabled;
+  }
+
+  Future<void> toggleCamera() async {
+    await setCameraEnabled(!cameraEnabledNotifier.value);
+  }
+
+  Future<void> toggleMicrophone() async {
+    await setMicrophoneEnabled(!microphoneEnabledNotifier.value);
+  }
+
+  Future<void> flipCamera() async {
+    final local = _room?.localParticipant;
+    if (local == null) {
+      throw Exception('Room is not initialized. Call connect() first.');
+    }
+    _useFrontCamera = !_useFrontCamera;
+    if (cameraEnabledNotifier.value) {
+      await setCameraEnabled(true);
+    }
+  }
+
+  void _attachRoomListener() {
+    if (_room == null) return;
+    _roomListener ??= _onRoomChanged;
+    _room!.addListener(_roomListener!);
+  }
+
+  void _onRoomChanged() {
+    _emitState();
+  }
+
+  void _emitState() {
+    final local = _room?.localParticipant;
+    final remotes = _room?.remoteParticipants.values.toList() ?? [];
+    participantsStateNotifier.value = ParticipantsState(
+      localParticipant: local,
+      remoteParticipants: remotes,
+    );
+    cameraEnabledNotifier.value = local?.hasVideo ?? false;
+    microphoneEnabledNotifier.value = local?.hasAudio ?? false;
+    connectionStateNotifier.value =
+        _room?.connectionState ?? ConnectionState.disconnected;
   }
 
   // ====== 추가: 룸/참가자 조회 및 삭제 ======
@@ -222,8 +334,13 @@ class LiveKitService {
     final response = await _authorizedRequest(
       () => http.get(uri, headers: headers),
     );
+
     if (response.statusCode == 200) {
+      if (response.bodyBytes.isEmpty) {
+        return [];
+      }
       final List<dynamic> list = json.decode(utf8.decode(response.bodyBytes));
+
       return list.cast<Map<String, dynamic>>();
     }
     if (response.statusCode == 204) {
@@ -255,4 +372,14 @@ class LiveKitService {
       throw Exception('룸 삭제 실패: ${response.statusCode} ${response.body}');
     }
   }
+}
+
+class ParticipantsState {
+  final LocalParticipant? localParticipant;
+  final List<RemoteParticipant> remoteParticipants;
+
+  const ParticipantsState({
+    required this.localParticipant,
+    required this.remoteParticipants,
+  });
 }

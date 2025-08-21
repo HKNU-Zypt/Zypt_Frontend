@@ -1,28 +1,31 @@
 class StudyRoom {
   final String id;
   final String name;
-  final String hostName;
-  final int participantCount;
-  final DateTime createdAt;
+  final int numParticipants;
+  final int maxParticipants;
   final bool isActive;
 
   StudyRoom({
     required this.id,
     required this.name,
-    required this.hostName,
-    required this.participantCount,
-    required this.createdAt,
+    required this.numParticipants,
+    required this.maxParticipants,
     this.isActive = true,
   });
 
-  // TODO: 실제 서버 API 연동 시 JSON 변환 메서드 추가
+  // 서버 응답(roomId, roomName, numParticipants, maxParticipants)에 맞춘 변환
+  // 일부 로컬 키(id, name, participantCount)도 허용하여 유연하게 처리
   factory StudyRoom.fromJson(Map<String, dynamic> json) {
+    final dynamic idValue = json['id'] ?? json['roomId'];
+    final dynamic nameValue = json['name'] ?? json['roomName'];
+    final dynamic currentCountValue = json['numParticipants'];
+    final dynamic maxCountValue = json['maxParticipants'];
+
     return StudyRoom(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      hostName: json['hostName'] as String,
-      participantCount: json['participantCount'] as int,
-      createdAt: DateTime.parse(json['createdAt'] as String),
+      id: idValue?.toString() ?? '',
+      name: nameValue?.toString() ?? '',
+      numParticipants: (currentCountValue as num?)?.toInt() ?? 0,
+      maxParticipants: (maxCountValue as num?)?.toInt() ?? 0,
       isActive: json['isActive'] as bool? ?? true,
     );
   }
@@ -31,9 +34,8 @@ class StudyRoom {
     return {
       'id': id,
       'name': name,
-      'hostName': hostName,
-      'participantCount': participantCount,
-      'createdAt': createdAt.toIso8601String(),
+      'numParticipants': numParticipants,
+      'maxParticipants': maxParticipants,
       'isActive': isActive,
     };
   }

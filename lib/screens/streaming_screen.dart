@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:focused_study_time_tracker/layout/default_layout.dart';
 import 'package:focused_study_time_tracker/services/livekit.dart';
@@ -21,12 +20,6 @@ class StreamingScreen extends StatefulWidget {
 class _StreamingScreenState extends State<StreamingScreen> {
   final LiveKitService _liveKitService = LiveKitService();
   bool _isConnecting = false;
-  bool _isDisposed = false;
-  Timer? _rebuildTimer;
-  final Duration _rebuildDebounce = const Duration(milliseconds: 120);
-
-  lk.LocalParticipant? _localParticipant;
-  List<lk.RemoteParticipant> _remoteParticipants = const [];
 
   @override
   void initState() {
@@ -34,39 +27,16 @@ class _StreamingScreenState extends State<StreamingScreen> {
     _initializeLiveKit();
   }
 
-  void _onRoomDidUpdate() {
-    _refreshParticipants();
-    _scheduleRebuild();
-  }
-
-  void _refreshParticipants() {
-    if (_liveKitService.isRoomInitialized) {
-      _localParticipant = _liveKitService.room.localParticipant;
-      _remoteParticipants =
-          _liveKitService.room.remoteParticipants.values.toList();
-    }
-  }
-
-  void _scheduleRebuild() {
-    if (!mounted || _isDisposed) return;
-    _rebuildTimer?.cancel();
-    _rebuildTimer = Timer(_rebuildDebounce, () {
-      if (!mounted || _isDisposed) return;
-      setState(() {});
-    });
-  }
-
   Future<void> _initializeLiveKit() async {
     setState(() => _isConnecting = true);
     try {
       await _liveKitService.initialize();
+      await _liveKitService.ensurePermissions();
       if (!_liveKitService.isRoomInitialized) {
         await _liveKitService.connect(widget.roomName, widget.participantName);
       }
-      _liveKitService.room.addListener(_onRoomDidUpdate);
       await _liveKitService.publishVideo();
       await _liveKitService.publishAudio();
-      _refreshParticipants();
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -83,9 +53,6 @@ class _StreamingScreenState extends State<StreamingScreen> {
 
   @override
   void dispose() {
-    _isDisposed = true;
-    _rebuildTimer?.cancel();
-    _liveKitService.room.removeListener(_onRoomDidUpdate);
     _liveKitService.disconnect();
     super.dispose();
   }
@@ -137,49 +104,52 @@ class _StreamingScreenState extends State<StreamingScreen> {
   }
 
   Widget _buildParticipantGrid() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final localParticipant = _localParticipant;
-        final remoteParticipants = _remoteParticipants;
-        final allParticipants = [
-          if (localParticipant != null) localParticipant,
-          ...remoteParticipants,
-        ];
+    return ValueListenableBuilder<ParticipantsState>(
+      valueListenable: _liveKitService.participantsStateNotifier,
+      builder: (context, state, __) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final localParticipant = state.localParticipant;
+            final remoteParticipants = state.remoteParticipants;
+            final allParticipants = [
+              if (localParticipant != null) localParticipant,
+              ...remoteParticipants,
+            ];
 
-        if (allParticipants.isEmpty) {
-          return const Center(
-            child: Text('참가자가 없습니다', style: TextStyle(color: Colors.white)),
-          );
-        }
+            if (allParticipants.isEmpty) {
+              return const Center(
+                child: Text('참가자가 없습니다', style: TextStyle(color: Colors.white)),
+              );
+            }
 
-        final columns = (allParticipants.length < 2) ? 1 : 2;
-        final rows = (allParticipants.length + columns - 1) ~/ columns;
+            final columns = (allParticipants.length < 2) ? 1 : 2;
+            final rows = (allParticipants.length + columns - 1) ~/ columns;
 
-        final aspectRatio =
-            (constraints.maxHeight <= 0 || rows <= 0)
-                ? 1.0
-                : (constraints.maxWidth / constraints.maxHeight * rows).clamp(
-                  0.1,
-                  3.0,
+            final aspectRatio =
+                (constraints.maxHeight <= 0 || rows <= 0)
+                    ? 1.0
+                    : (constraints.maxWidth / constraints.maxHeight * rows)
+                        .clamp(0.1, 3.0);
+
+            return GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                childAspectRatio: aspectRatio,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
+              ),
+              itemCount: allParticipants.length,
+              itemBuilder: (context, index) {
+                final participant = allParticipants[index];
+                return RepaintBoundary(
+                  child:
+                      participant is lk.LocalParticipant
+                          ? _buildLocalParticipantView(participant)
+                          : _buildParticipantView(
+                            participant as lk.RemoteParticipant,
+                          ),
                 );
-
-        return GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            childAspectRatio: aspectRatio,
-            crossAxisSpacing: 4,
-            mainAxisSpacing: 4,
-          ),
-          itemCount: allParticipants.length,
-          itemBuilder: (context, index) {
-            final participant = allParticipants[index];
-            return RepaintBoundary(
-              child:
-                  participant is lk.LocalParticipant
-                      ? _buildLocalParticipantView(participant)
-                      : _buildParticipantView(
-                        participant as lk.RemoteParticipant,
-                      ),
+              },
             );
           },
         );
@@ -276,58 +246,78 @@ class _StreamingScreenState extends State<StreamingScreen> {
   }
 
   Widget _buildControlBar() {
-    final localParticipant = _liveKitService.localParticipant;
-    if (localParticipant == null) return const SizedBox.shrink();
-
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       color: Colors.black.withOpacity(0.3),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          IconButton(
-            icon: Icon(
-              localParticipant.hasVideo ? Icons.videocam : Icons.videocam_off,
-              color: Colors.white,
-            ),
-            onPressed: () async {
-              try {
-                if (localParticipant.hasVideo) {
-                  await _liveKitService.unpublishVideo();
-                } else {
-                  await _liveKitService.publishVideo();
-                }
-                if (mounted) setState(() {});
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('카메라 제어 중 오류 발생: $e')));
-                }
-              }
+          ValueListenableBuilder<bool>(
+            valueListenable: _liveKitService.cameraEnabledNotifier,
+            builder: (context, enabled, _) {
+              return IconButton(
+                icon: Icon(
+                  enabled ? Icons.videocam : Icons.videocam_off,
+                  color: Colors.white,
+                ),
+                onPressed: () async {
+                  try {
+                    await _liveKitService.toggleCamera();
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('카메라 제어 중 오류 발생: $e')),
+                      );
+                    }
+                  }
+                },
+              );
             },
           ),
           const SizedBox(width: 16),
-          IconButton(
-            icon: Icon(
-              localParticipant.hasAudio ? Icons.mic : Icons.mic_off,
-              color: Colors.white,
-            ),
-            onPressed: () async {
-              try {
-                if (localParticipant.hasAudio) {
-                  await _liveKitService.unpublishAudio();
-                } else {
-                  await _liveKitService.publishAudio();
-                }
-                if (mounted) setState(() {});
-              } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('마이크 제어 중 오류 발생: $e')));
-                }
-              }
+          ValueListenableBuilder<bool>(
+            valueListenable: _liveKitService.microphoneEnabledNotifier,
+            builder: (context, enabled, _) {
+              return IconButton(
+                icon: Icon(
+                  enabled ? Icons.mic : Icons.mic_off,
+                  color: Colors.white,
+                ),
+                onPressed: () async {
+                  try {
+                    await _liveKitService.toggleMicrophone();
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('마이크 제어 중 오류 발생: $e')),
+                      );
+                    }
+                  }
+                },
+              );
+            },
+          ),
+          const SizedBox(width: 16),
+          ValueListenableBuilder<bool>(
+            valueListenable: _liveKitService.cameraEnabledNotifier,
+            builder: (context, enabled, _) {
+              return IconButton(
+                icon: const Icon(Icons.cameraswitch, color: Colors.white),
+                onPressed:
+                    enabled
+                        ? () async {
+                          try {
+                            await _liveKitService.flipCamera();
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('카메라 전환 실패: $e')),
+                              );
+                            }
+                          }
+                        }
+                        : null,
+              );
             },
           ),
         ],
@@ -336,31 +326,35 @@ class _StreamingScreenState extends State<StreamingScreen> {
   }
 
   Widget _buildConnectionStatus() {
-    final connectionState = _liveKitService.room.connectionState;
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-      color: Colors.black45,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color:
-                  connectionState == lk.ConnectionState.connected
-                      ? Colors.green
-                      : Colors.red,
-            ),
+    return ValueListenableBuilder<lk.ConnectionState>(
+      valueListenable: _liveKitService.connectionStateNotifier,
+      builder: (context, state, _) {
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+          color: Colors.black45,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color:
+                      state == lk.ConnectionState.connected
+                          ? Colors.green
+                          : Colors.red,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                state == lk.ConnectionState.connected ? '연결됨' : '연결 중...',
+                style: const TextStyle(color: Colors.white, fontSize: 12),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          Text(
-            connectionState == lk.ConnectionState.connected ? '연결됨' : '연결 중...',
-            style: const TextStyle(color: Colors.white, fontSize: 12),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

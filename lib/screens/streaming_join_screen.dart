@@ -3,7 +3,7 @@ import 'package:focused_study_time_tracker/layout/default_layout.dart';
 import 'package:focused_study_time_tracker/models/study_room.dart';
 import 'package:focused_study_time_tracker/screens/streaming_screen.dart';
 import 'package:focused_study_time_tracker/services/livekit.dart';
-import 'package:intl/intl.dart';
+import 'package:focused_study_time_tracker/services/user_service.dart';
 
 class StreamingJoinScreen extends StatefulWidget {
   const StreamingJoinScreen({super.key});
@@ -14,19 +14,32 @@ class StreamingJoinScreen extends StatefulWidget {
 
 class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
   final LiveKitService _liveKitService = LiveKitService();
+  final UserService _userService = UserService();
   final List<StudyRoom> _rooms = [];
   bool _isLoading = false;
+  String? _nickname;
 
   @override
   void initState() {
     super.initState();
+    _loadNickname();
     _loadRooms();
+  }
+
+  Future<void> _loadNickname() async {
+    final nick = await _userService.getNickname();
+    if (!mounted) return;
+    setState(() {
+      _nickname = nick;
+    });
   }
 
   Future<void> _loadRooms() async {
     setState(() => _isLoading = true);
     try {
+      print('zypt [StreamingJoinScreen] _loadRooms - 방 목록 불러오기 시작');
       final rooms = await _liveKitService.fetchAllRooms();
+      print('rooms: $rooms');
       setState(() {
         _rooms
           ..clear()
@@ -34,11 +47,10 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
             (rooms ?? []).map((e) {
               // 백엔드 DTO: roomName, roomId, emptyTimeOut, maxParticipants, numParticipants
               return StudyRoom(
-                id: e['roomId']?.toString() ?? e['roomName'] as String,
+                id: e['roomId'].toString(),
                 name: e['roomName'] as String,
-                hostName: '호스트', // 서버에서 호스트 정보는 제공되지 않음
-                participantCount: (e['numParticipants'] as num?)?.toInt() ?? 0,
-                createdAt: DateTime.now(), // 생성 시간 정보가 없어 현재 시간으로 대체
+                numParticipants: (e['numParticipants'] as num?)?.toInt() ?? 0,
+                maxParticipants: (e['maxParticipants'] as num?)?.toInt() ?? 0,
               );
             }),
           );
@@ -64,7 +76,7 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
 
     if (result != null && mounted) {
       final roomName = result['name']!;
-      final hostName = result['hostName']!;
+      final nickname = _nickname ?? await _userService.getNickname() ?? '나';
       try {
         // LiveKit 초기화 후 서버에 방 생성 요청 및 즉시 연결
         await _liveKitService.initialize();
@@ -76,7 +88,7 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
             builder:
                 (context) => StreamingScreen(
                   roomName: roomName,
-                  participantName: hostName,
+                  participantName: nickname,
                 ),
           ),
         );
@@ -121,10 +133,14 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
                               room: room,
                               onTap: () async {
                                 try {
+                                  final nickname =
+                                      _nickname ??
+                                      await _userService.getNickname() ??
+                                      '나';
                                   await _liveKitService.initialize();
                                   await _liveKitService.connect(
                                     room.name,
-                                    '참가자',
+                                    nickname,
                                   );
                                   if (!mounted) return;
                                   Navigator.push(
@@ -133,7 +149,7 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
                                       builder:
                                           (context) => StreamingScreen(
                                             roomName: room.name,
-                                            participantName: '참가자',
+                                            participantName: nickname,
                                           ),
                                     ),
                                   );
@@ -192,7 +208,7 @@ class _RoomCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      '${room.participantCount}명 참여 중',
+                      '${room.numParticipants}/${room.maxParticipants}명',
                       style: TextStyle(
                         color: Colors.green[800],
                         fontSize: 12,
@@ -203,23 +219,6 @@ class _RoomCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.person, size: 16, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text(
-                    '호스트: ${room.hostName}',
-                    style: const TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
-                  const SizedBox(width: 16),
-                  const Icon(Icons.access_time, size: 16, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text(
-                    '시작: ${DateFormat('MM/dd HH:mm').format(room.createdAt)}',
-                    style: const TextStyle(color: Colors.grey, fontSize: 14),
-                  ),
-                ],
-              ),
             ],
           ),
         ),
@@ -238,12 +237,10 @@ class _CreateRoomDialog extends StatefulWidget {
 class _CreateRoomDialogState extends State<_CreateRoomDialog> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _hostNameController = TextEditingController();
 
   @override
   void dispose() {
     _nameController.dispose();
-    _hostNameController.dispose();
     super.dispose();
   }
 
@@ -269,20 +266,6 @@ class _CreateRoomDialogState extends State<_CreateRoomDialog> {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _hostNameController,
-              decoration: const InputDecoration(
-                labelText: '호스트 이름',
-                hintText: '예: 김철수',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return '호스트 이름을 입력해주세요';
-                }
-                return null;
-              },
-            ),
           ],
         ),
       ),
@@ -294,10 +277,7 @@ class _CreateRoomDialogState extends State<_CreateRoomDialog> {
         FilledButton(
           onPressed: () {
             if (_formKey.currentState!.validate()) {
-              Navigator.pop(context, {
-                'name': _nameController.text,
-                'hostName': _hostNameController.text,
-              });
+              Navigator.pop(context, {'name': _nameController.text});
             }
           },
           child: const Text('만들기'),
