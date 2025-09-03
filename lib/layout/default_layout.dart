@@ -12,7 +12,7 @@ class DefaultLayout extends StatelessWidget {
     return Scaffold(
       body: SafeArea(child: child),
       appBar: appBar,
-      backgroundColor: Color(0xffc7c7c7),
+      backgroundColor: Colors.white,
     );
   }
 }
