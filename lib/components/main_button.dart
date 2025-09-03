@@ -53,17 +53,22 @@ class MainButton extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           padding: EdgeInsets.zero,
-          backgroundColor: Colors.black,
+          backgroundColor: const Color(0xFF1B1B1B),
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
           ),
+          elevation: 0,
         ),
         onPressed: onPressed,
         child: Center(
           child: Text(
             title,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              fontFamily: 'SoyoMaple',
+            ),
           ),
         ),
       ),
@@ -84,11 +89,11 @@ class MainButton extends StatelessWidget {
   double _heightFor(ButtonSize size) {
     switch (size) {
       case ButtonSize.small:
-        return 60;
+        return 56;
       case ButtonSize.medium:
-        return 60;
+        return 40;
       case ButtonSize.large:
-        return 68;
+        return 64;
     }
   }
 }
