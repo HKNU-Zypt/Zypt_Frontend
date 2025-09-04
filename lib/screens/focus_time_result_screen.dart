@@ -12,6 +12,7 @@ class FocusResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 예시 데이터
     final stats = {
       '공부 시간': '1시간',
       '집중 시간': '55분',
@@ -20,8 +21,11 @@ class FocusResultScreen extends StatelessWidget {
       '집중하지 않음': '0번',
     };
 
-    final times = ['11:30', '11:40', '11:45', '12:30', '13:40', '14:45'];
+    // 집중 시작~끝 시간 예시
+    final times = ['11:30', '14:45'];
+    final unfocusTime = ['11:40', '11:45', '12:30', '13:40'];
 
+    // HH:mm 형식의 문자열을 오늘 날짜의 DateTime 객체로 변환하는 함수
     DateTime _onToday(String hhmm) {
       final p = hhmm.split(':');
       return DateTime(
@@ -35,9 +39,17 @@ class FocusResultScreen extends StatelessWidget {
 
     final startDt = _onToday(times.first);
     final endDt = _onToday(times.last);
+
+    // 집중하지 못한 구간 예시 , HH:mm 형식의 문자열 리스트
     final unfocused = [
-      TimeInterval(_onToday(times[1]), _onToday(times[2])), // 11:40~11:45
-      TimeInterval(_onToday(times[3]), _onToday(times[4])), // 11:40~11:45
+      TimeInterval(
+        _onToday(unfocusTime[0]),
+        _onToday(unfocusTime[1]),
+      ), // 11:40~11:45
+      TimeInterval(
+        _onToday(unfocusTime[2]),
+        _onToday(unfocusTime[3]),
+      ), // 12:30~13:40
     ];
 
     return Scaffold(
@@ -59,15 +71,16 @@ class FocusResultScreen extends StatelessWidget {
             OffsetOutlinedCard(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
               child: FocusTimelineBar(
-                start: startDt,
-                end: endDt,
-                unfocused: unfocused,
-                height: 45,
-                trackHeight: 3,
+                start: startDt, // 시작 시간
+                end: endDt, // 끝 시간
+                unfocused: unfocused, // 집중하지 못한 구간 리스트
+                height: 45, // 전체 높이
+                trackHeight: 3, // 집중 바 높이
               ),
             ),
-            SizedBox(height: 20), // 이부분에 적용해야해
+            SizedBox(height: 20),
             OffsetOutlinedCard(
+              padding: const EdgeInsets.fromLTRB(30, 16, 30, 16),
               child: Column(
                 children:
                     stats.entries

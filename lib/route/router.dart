@@ -34,6 +34,10 @@ final router = GoRouter(
           builder: (context, state) => StreamingJoinScreen(),
         ),
         GoRoute(path: '/mypage', builder: (context, state) => MyPageScreen()),
+        GoRoute(
+          path: '/result',
+          builder: (context, state) => FocusResultScreen(),
+        ),
       ],
     ),
 
@@ -50,6 +54,5 @@ final router = GoRouter(
       path: '/focus-v2',
       builder: (context, state) => FocusTimeScreenV2(),
     ),
-    GoRoute(path: '/result', builder: (context, state) => FocusResultScreen()),
   ],
 );

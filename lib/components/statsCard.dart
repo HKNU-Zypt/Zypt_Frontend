@@ -20,7 +20,7 @@ class OffsetOutlinedCard extends StatelessWidget {
     this.borderWidth = 1.6,
     this.outlineOffset = 8,
     this.padding = const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-    this.outerPadding = const EdgeInsets.symmetric(horizontal: 12),
+    this.outerPadding = const EdgeInsets.symmetric(horizontal: 15),
     this.background = Colors.white,
     this.borderColor = Colors.black87,
     this.outlineColor = const Color.fromARGB(200, 0, 0, 0),
