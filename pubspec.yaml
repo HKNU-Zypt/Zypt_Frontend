@@ -81,6 +81,7 @@ flutter:
   assets:
     - .env
     - assets/models/landmark_model.tflite
+    - assets/images/focusStartButton.png
     # - assets/concentration_model.tflite
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

@@ -10,11 +10,14 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+var weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+
 class _HomeScreenState extends State<HomeScreen> {
   final UserService _userService = UserService();
 
   @override
   Widget build(BuildContext context) {
+    DateTime now = DateTime.now();
     return Scaffold(
       body: Container(
         color: Colors.white,
@@ -26,34 +29,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 // 사용자 정보 섹션
                 Container(
                   padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.blue[50],
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.blue[200]!),
-                  ),
+
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            _userService.currentUser?.nickName ?? '닉네임 없음',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          if (_userService.currentUser?.email.isNotEmpty ==
-                              true)
-                            Text(
-                              _userService.currentUser!.email,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                        ],
+                      Text(
+                        "${now.year}.${now.month}.${now.day} (${weekdays[now.weekday - 1]})",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
@@ -67,35 +52,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
-                          '집중 시간 추적기',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 32),
-                        // FocusTimeScreen 제거에 따라 버튼도 제거
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const FocusTimeScreen(),
-                              ),
-                            );
+                        GestureDetector(
+                          onTap: () {
+                            context.go('/focus-v2');
                           },
-                          child: const Text(
-                            '집중 시작 v2',
-                            style: TextStyle(fontSize: 18),
+
+                          child: FractionallySizedBox(
+                            widthFactor: 0.7, // 부모의 너비의 70%
+                            child: Image.asset(
+                              'assets/images/focusStartButton.png',
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        ElevatedButton(
-                          onPressed: () => context.push('/focus-test'),
-                          child: const Text('Focus API 테스트 페이지'),
-                        ),
+
+                        SizedBox(height: 20),
                       ],
                     ),
                   ),
