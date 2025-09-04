@@ -45,6 +45,7 @@ final router = GoRouter(
       builder: (context, state) => const FocusTimeTestScreen(),
     ),
     GoRoute(path: '/focus', builder: (context, state) => FocusTimeScreen()),
+
     GoRoute(
       path: '/focus-v2',
       builder: (context, state) => FocusTimeScreenV2(),

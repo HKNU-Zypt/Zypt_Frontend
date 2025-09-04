@@ -52,9 +52,12 @@ dependencies:
   google_sign_in: ^7.1.0
   shared_preferences: ^2.5.3
 
+  flutter_svg: ^2.0.10+1
+
   google_mlkit_face_mesh_detection: ^0.4.1
   permission_handler: ^12.0.1
   native_device_orientation: ^2.0.3
+  animated_bottom_navigation_bar: ^1.4.0
 
 dev_dependencies:
   flutter_test:
@@ -82,6 +85,21 @@ flutter:
     - .env
     - assets/models/landmark_model.tflite
     - assets/images/focusStartButton.png
+    - assets/images/
+
+  fonts:
+    - family: SoyoMaple
+      fonts:
+        - asset: assets/fonts/SOYO Maple Regular.ttf
+          weight: 400
+        - asset: assets/fonts/SOYO Maple Bold.ttf
+          weight: 700
+    - family: AppleSDGothicNeo
+      fonts:
+        - asset: assets/fonts/AppleSDGothicNeo-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/AppleSDGothicNeo-Bold.ttf
+          weight: 700
     # - assets/concentration_model.tflite
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

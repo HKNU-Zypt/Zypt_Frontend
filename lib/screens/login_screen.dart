@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:focused_study_time_tracker/layout/default_layout.dart';
 import 'package:focused_study_time_tracker/services/login.dart';
 import 'package:go_router/go_router.dart';
@@ -15,68 +16,80 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return DefaultLayout(
       child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            // 로그인 버튼
-            ElevatedButton(
-              onPressed: () {
-                LoginService().loginWithKakao().then((value) {
-                  if (value) {
-                    print('[LoginScreen] 카카오 로그인 성공');
-                    context.go('/nickname');
-                  }
-                });
-              },
-              child: const Text('카카오 로그인'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                LoginService().loginWithNaver().then((value) {
-                  if (value) {
-                    print('[LoginScreen] 네이버 로그인 성공');
-                    context.go('/nickname');
-                  }
-                });
-              },
-              child: const Text('네이버 로그인'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                LoginService().loginWithGoogle().then((value) {
-                  if (value) {
-                    print('[LoginScreen] 구글 로그인 성공');
-                    context.go('/nickname');
-                  }
-                });
-              },
-              child: const Text('구글 로그인'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                context.go('/nickname');
-              },
-              child: const Text('닉네임 설정'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                context.go('/home');
-              },
-              child: const Text('홈으로 이동'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                LoginService().getAccessToken().then((value) {
-                  print('[LoginScreen] zypt 액세스 토큰: $value');
-                  LoginService().getRefreshToken().then((value) {
-                    print('[LoginScreen] zypt 리프레시 토큰: $value');
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              // 브랜드 로고
+              SvgPicture.asset('assets/images/zypt_logo.svg', width: 200),
+              const SizedBox(height: 165),
+              // 소셜 로그인 버튼들 (피그마 스타일의 SVG 버튼)
+              _SocialLoginButton(
+                assetPath: 'assets/images/kakao_login.svg',
+                semanticsLabel: '카카오로 시작하기',
+                onTap: () {
+                  LoginService().loginWithKakao().then((ok) {
+                    if (ok) context.go('/nickname');
                   });
-                });
-              },
-              child: const Text('zypt token 확인'),
-            ),
-          ],
+                },
+              ),
+              const SizedBox(height: 20),
+              _SocialLoginButton(
+                assetPath: 'assets/images/naver_login.svg',
+                semanticsLabel: '네이버로 시작하기',
+                onTap: () {
+                  LoginService().loginWithNaver().then((ok) {
+                    if (ok) context.go('/nickname');
+                  });
+                },
+              ),
+              const SizedBox(height: 20),
+              _SocialLoginButton(
+                assetPath: 'assets/images/google_login.svg',
+                semanticsLabel: '구글로 시작하기',
+                onTap: () {
+                  LoginService().loginWithGoogle().then((ok) {
+                    if (ok) context.go('/nickname');
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SocialLoginButton extends StatelessWidget {
+  final String assetPath;
+  final String? semanticsLabel;
+  final VoidCallback onTap;
+
+  const _SocialLoginButton({
+    required this.assetPath,
+    required this.onTap,
+    this.semanticsLabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: Center(
+          child: SvgPicture.asset(
+            assetPath,
+            height: 56,
+            fit: BoxFit.contain,
+            semanticsLabel: semanticsLabel,
+          ),
         ),
       ),
     );
