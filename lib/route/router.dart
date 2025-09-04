@@ -5,8 +5,10 @@ import 'package:focused_study_time_tracker/screens/focus_time_test_screen.dart';
 import 'package:focused_study_time_tracker/screens/login_screen.dart';
 import 'package:focused_study_time_tracker/screens/mypage_screen.dart';
 import 'package:focused_study_time_tracker/screens/nick_name_screen.dart';
+import 'package:focused_study_time_tracker/screens/open_source_info_screen.dart';
 import 'package:focused_study_time_tracker/screens/statistics_screen.dart';
 import 'package:focused_study_time_tracker/screens/streaming_join_screen.dart';
+import 'package:focused_study_time_tracker/screens/terms_of_service_screen.dart';
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
@@ -43,5 +45,13 @@ final router = GoRouter(
       builder: (context, state) => const FocusTimeTestScreen(),
     ),
     GoRoute(path: '/focus', builder: (context, state) => FocusTimeScreen()),
+    GoRoute(
+      path: '/opensource',
+      builder: (context, state) => OpenSourceInfoScreen(),
+    ),
+    GoRoute(
+      path: '/terms',
+      builder: (context, state) => TermsOfServiceScreen(),
+    ),
   ],
 );
