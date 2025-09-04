@@ -1,6 +1,5 @@
 .env
 pubspec.lock
-
 # Miscellaneous
 *.class
 *.log
