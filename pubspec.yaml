@@ -84,7 +84,6 @@ flutter:
   assets:
     - .env
     - assets/models/landmark_model.tflite
-    - assets/images/focusStartButton.png
     - assets/images/
 
   fonts:
