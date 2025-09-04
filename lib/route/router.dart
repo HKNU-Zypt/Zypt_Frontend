@@ -54,6 +54,7 @@ final router = GoRouter(
     GoRoute(
       path: '/focus-v2',
       builder: (context, state) => FocusTimeScreenV2(),
+    ),
     GoRoute(
       path: '/opensource',
       builder: (context, state) => OpenSourceInfoScreen(),
