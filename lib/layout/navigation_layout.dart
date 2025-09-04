@@ -12,7 +12,7 @@ class NavigationLayout extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          context.go('/focus');
+          context.go('/focus-v2');
         },
         backgroundColor: Colors.black,
         shape: const CircleBorder(),

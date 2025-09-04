@@ -1,5 +1,7 @@
 import 'package:focused_study_time_tracker/layout/navigation_layout.dart';
+import 'package:focused_study_time_tracker/screens/focus_time_result_screen.dart';
 import 'package:focused_study_time_tracker/screens/focus_time_screen.dart';
+import 'package:focused_study_time_tracker/screens/focus_time_screenV2.dart';
 import 'package:focused_study_time_tracker/screens/home_screen.dart';
 import 'package:focused_study_time_tracker/screens/focus_time_test_screen.dart';
 import 'package:focused_study_time_tracker/screens/login_screen.dart';
@@ -34,6 +36,10 @@ final router = GoRouter(
           builder: (context, state) => StreamingJoinScreen(),
         ),
         GoRoute(path: '/mypage', builder: (context, state) => MyPageScreen()),
+        GoRoute(
+          path: '/result',
+          builder: (context, state) => FocusResultScreen(),
+        ),
       ],
     ),
 
@@ -45,6 +51,9 @@ final router = GoRouter(
       builder: (context, state) => const FocusTimeTestScreen(),
     ),
     GoRoute(path: '/focus', builder: (context, state) => FocusTimeScreen()),
+    GoRoute(
+      path: '/focus-v2',
+      builder: (context, state) => FocusTimeScreenV2(),
     GoRoute(
       path: '/opensource',
       builder: (context, state) => OpenSourceInfoScreen(),
