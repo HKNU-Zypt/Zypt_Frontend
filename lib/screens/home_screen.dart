@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:focused_study_time_tracker/screens/focus_time_screen.dart';
@@ -26,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
+                SizedBox(height: 10),
                 // 사용자 정보 섹션
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -38,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
+                          fontFamily: 'SoyoMaple',
                         ),
                       ),
                     ],

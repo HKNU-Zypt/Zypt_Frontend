@@ -60,12 +60,20 @@ class FocusResultScreen extends StatelessWidget {
             SizedBox(height: 16),
             Text(
               '집중 분석 결과',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'SoyoMaple',
+              ),
             ),
             SizedBox(height: 8),
             Text(
               "${now.year}.${now.month}.${now.day} (${weekdays[now.weekday - 1]})",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'AppleSDGothicNeo',
+              ),
             ),
             SizedBox(height: 32),
             OffsetOutlinedCard(
@@ -80,7 +88,7 @@ class FocusResultScreen extends StatelessWidget {
             ),
             SizedBox(height: 20),
             OffsetOutlinedCard(
-              padding: const EdgeInsets.fromLTRB(30, 16, 30, 16),
+              padding: const EdgeInsets.fromLTRB(60, 16, 60, 16),
               child: Column(
                 children:
                     stats.entries
@@ -90,11 +98,19 @@ class FocusResultScreen extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(e.key, style: TextStyle(fontSize: 18)),
+                                Text(
+                                  e.key,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontFamily: 'AppleSDGothicNeo',
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
                                 Text(
                                   e.value,
                                   style: TextStyle(
-                                    fontSize: 18,
+                                    fontSize: 15,
+                                    fontFamily: 'AppleSDGothicNeo',
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
