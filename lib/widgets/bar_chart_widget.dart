@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:focused_study_time_tracker/screens/statistics_all_screen.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class BarChartWidget extends StatelessWidget {
@@ -64,4 +63,11 @@ class BarChartWidget extends StatelessWidget {
       ],
     );
   }
+}
+
+class StudyData {
+  final String hours;
+  final double studytime;
+
+  StudyData(this.hours, this.studytime);
 }

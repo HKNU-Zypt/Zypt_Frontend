@@ -22,7 +22,15 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("통계"), centerTitle: true),
+      appBar: AppBar(
+        title: Text(
+          "통계",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+      ),
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           // 버튼 고정 영역
@@ -31,20 +39,34 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
             children: [
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  // 버튼의 배경색을 조건부로 변경합니다.
                   backgroundColor:
-                      _selectedIndex == 0 ? Colors.blue : Colors.grey,
+                      _selectedIndex == 0 ? Colors.blue : Colors.white,
                 ),
                 onPressed: () => setState(() => _selectedIndex = 0),
-                child: Text("전체 통계"),
+                child: Text(
+                  "전체 통계",
+                  style: TextStyle(
+                    color:
+                        _selectedIndex == 0
+                            ? Colors.white
+                            : Colors.black, // 텍스트 색상 변경
+                  ),
+                ),
               ),
               SizedBox(width: 75),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
-                      _selectedIndex == 1 ? Colors.blue : Colors.grey,
+                      _selectedIndex == 1 ? Colors.blue : Colors.white,
                 ),
                 onPressed: () => setState(() => _selectedIndex = 1),
-                child: Text("기록 리스트"),
+                child: Text(
+                  "기록 리스트",
+                  style: TextStyle(
+                    color: _selectedIndex == 1 ? Colors.white : Colors.black,
+                  ),
+                ),
               ),
             ],
           ),
