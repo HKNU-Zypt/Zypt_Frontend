@@ -8,7 +8,9 @@ import 'package:focused_study_time_tracker/screens/login_screen.dart';
 import 'package:focused_study_time_tracker/screens/mypage_screen.dart';
 import 'package:focused_study_time_tracker/screens/nick_name_screen.dart';
 import 'package:focused_study_time_tracker/screens/open_source_info_screen.dart';
+import 'package:focused_study_time_tracker/screens/record_list_screen.dart';
 import 'package:focused_study_time_tracker/screens/statistics_screen.dart';
+import 'package:focused_study_time_tracker/screens/statistics_screenV2.dart';
 import 'package:focused_study_time_tracker/screens/streaming_join_screen.dart';
 import 'package:focused_study_time_tracker/screens/terms_of_service_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -29,7 +31,7 @@ final router = GoRouter(
         GoRoute(path: '/home', builder: (context, state) => HomeScreen()),
         GoRoute(
           path: '/statistics',
-          builder: (context, state) => StatisticsScreen(),
+          builder: (context, state) => StatisticsScreenv2(),
         ),
         GoRoute(
           path: '/streaming',
@@ -55,7 +57,7 @@ final router = GoRouter(
       path: '/focus-v2',
       builder: (context, state) => FocusTimeScreenV2(),
     ),
-    
+
     GoRoute(
       path: '/opensource',
       builder: (context, state) => OpenSourceInfoScreen(),
