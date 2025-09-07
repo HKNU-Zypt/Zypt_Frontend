@@ -25,6 +25,7 @@ class _StatisticsAllScreenState extends State<StatisticsAllScreen> {
             children: [
               Text(
                 "${DateFormat('yyyy.M.d').format(startDate)} ~ ${DateFormat('yyyy.M.d').format(endDate)}",
+                style: TextStyle(fontWeight: FontWeight.w600),
               ),
               IconButton(
                 onPressed: () async {
@@ -46,38 +47,74 @@ class _StatisticsAllScreenState extends State<StatisticsAllScreen> {
             ],
           ),
           const SizedBox(height: 10),
-          Container(
-            width: 300,
-            height: 300,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.black),
-              color: Colors.white,
-            ),
-            child: const BarChartWidget(),
+          Stack(
+            children: [
+              Positioned(
+                child: Transform.translate(
+                  offset: Offset(5, 5),
+                  child: Container(
+                    width: 300,
+                    height: 300,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.black),
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                width: 300,
+                height: 300,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.black),
+                  color: Colors.white,
+                ),
+                child: const BarChartWidget(),
+              ),
+            ],
           ),
           const SizedBox(height: 30),
-          Container(
-            width: 300,
-            height: 200,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.black),
-            ),
-            child: const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text("최대 집중 시간대 : 23시"),
-                Text("최소 집중 시간대 : 6시"),
-                SizedBox(height: 20),
-                Text("하루 평균 집중 시간 : 10시간"),
-                SizedBox(height: 20),
-                Text("- - - - - - - - - - - - - - - - - - - - - - - -"),
-                SizedBox(height: 20),
-                Text("ㅇㅇ님은 총 ㅇㅇㅇㅇ시간 집중했어요!"),
-              ],
-            ),
+          Stack(
+            children: [
+              Positioned(
+                child: Transform.translate(
+                  offset: Offset(5, 5),
+                  child: Container(
+                    width: 300,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.black),
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                width: 300,
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.black),
+                ),
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("최대 집중 시간대 : 23시"),
+                    Text("최소 집중 시간대 : 6시"),
+                    SizedBox(height: 20),
+                    Text("하루 평균 집중 시간 : 10시간"),
+                    SizedBox(height: 20),
+                    Text("- - - - - - - - - - - - - - - - - - - - - - - -"),
+                    SizedBox(height: 20),
+                    Text("ㅇㅇ님은 총 ㅇㅇㅇㅇ시간 집중했어요!"),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

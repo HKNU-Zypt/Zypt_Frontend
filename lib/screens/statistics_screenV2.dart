@@ -37,36 +37,35 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  // 버튼의 배경색을 조건부로 변경합니다.
-                  backgroundColor:
-                      _selectedIndex == 0 ? Colors.blue : Colors.white,
+              TextButton(
+                style: TextButton.styleFrom(
+                  fixedSize: Size(125, 10),
+                  side: BorderSide(
+                    color:
+                        _selectedIndex == 0 ? Colors.black : Colors.transparent,
+                  ),
+                  backgroundColor: Colors.white,
                 ),
                 onPressed: () => setState(() => _selectedIndex = 0),
                 child: Text(
                   "전체 통계",
                   style: TextStyle(
-                    color:
-                        _selectedIndex == 0
-                            ? Colors.white
-                            : Colors.black, // 텍스트 색상 변경
+                    color: Colors.black, // 텍스트 색상 변경
                   ),
                 ),
               ),
-              SizedBox(width: 75),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      _selectedIndex == 1 ? Colors.blue : Colors.white,
+              SizedBox(width: 50),
+              TextButton(
+                style: TextButton.styleFrom(
+                  fixedSize: Size(125, 10),
+                  side: BorderSide(
+                    color:
+                        _selectedIndex == 1 ? Colors.black : Colors.transparent,
+                  ),
+                  backgroundColor: Colors.white,
                 ),
                 onPressed: () => setState(() => _selectedIndex = 1),
-                child: Text(
-                  "기록 리스트",
-                  style: TextStyle(
-                    color: _selectedIndex == 1 ? Colors.white : Colors.black,
-                  ),
-                ),
+                child: Text("기록 리스트", style: TextStyle(color: Colors.black)),
               ),
             ],
           ),
