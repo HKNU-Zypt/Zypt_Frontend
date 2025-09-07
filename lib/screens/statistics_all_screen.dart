@@ -11,212 +11,8 @@ class StatisticsAllScreen extends StatefulWidget {
 }
 
 class _StatisticsAllScreenState extends State<StatisticsAllScreen> {
-  // 캘린더 dialog
-  void showCalendarDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        // 상태 변수들을 StatefulBuilder 바깥에 선언
-        DateTime startDate = DateTime.now().subtract(const Duration(days: 7));
-        DateTime endDate = DateTime.now();
-        // ✨ 1. '선택 모드'를 기억할 변수 추가 (초기값은 '시작 날짜 선택 모드')
-        bool isSelectingStartDate = true;
-        return StatefulBuilder(
-          builder: (BuildContext context, setState) {
-            return Dialog(
-              // 다이얼로그의 배경색과 모서리를 설정합니다.
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min, // 콘텐츠 크기에 맞게 다이얼로그 크기 조절
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Container(
-                          width: 25,
-                          height: 25,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF121212),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.black),
-                          ),
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
-                            onPressed: () {
-                              print("저장 버튼 클릭");
-                            },
-                            icon: Icon(
-                              Icons.check_outlined,
-                              size: 20,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 10),
-                        Container(
-                          width: 25,
-                          height: 25,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF121212),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.black),
-                          ),
-                          child: IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
-                            onPressed: () {
-                              print("닫기 버튼 클릭");
-                            },
-                            icon: Icon(
-                              Icons.close_outlined,
-                              size: 20,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(
-                          color: Color(0xFF121212),
-                          width: 1.4,
-                        ),
-                        color: Colors.grey,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Icon(Icons.calendar_month_outlined, size: 20),
-                            TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  isSelectingStartDate = true;
-                                });
-                              },
-                              style: TextButton.styleFrom(
-                                // 현재 선택 모드에 따라 배경색으로 시각적 힌트 제공
-                                backgroundColor: Colors.transparent,
-                              ),
-                              child: Text(
-                                DateFormat('MMM d, yyyy').format(startDate),
-                                style: TextStyle(
-                                  color:
-                                      isSelectingStartDate
-                                          ? Color(0xFF121212)
-                                          : const Color.fromARGB(
-                                            255,
-                                            186,
-                                            186,
-                                            186,
-                                          ),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                setState(() {
-                                  isSelectingStartDate = false;
-                                });
-                              },
-                              style: TextButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                              ),
-                              child: Text(
-                                DateFormat('MMM d, yyyy').format(endDate),
-                                style: TextStyle(
-                                  color:
-                                      !isSelectingStartDate
-                                          ? Color(0xFF121212)
-                                          : const Color.fromARGB(
-                                            255,
-                                            186,
-                                            186,
-                                            186,
-                                          ),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    // 캘린더 위젯
-                    TableCalendar(
-                      focusedDay: isSelectingStartDate ? startDate : endDate,
-                      firstDay: DateTime.utc(2020, 1, 1),
-                      lastDay: DateTime.utc(2030, 12, 31),
-                      onDaySelected: (selectedDay, focusedDay) {
-                        setState(() {
-                          if (isSelectingStartDate) {
-                            startDate = selectedDay;
-                          } else {
-                            // 종료일이 시작일보다 빠르지 않도록 간단한 유효성 검사 추가 (선택사항)
-                            if (!selectedDay.isBefore(startDate)) {
-                              endDate = selectedDay;
-                            }
-                          }
-                        });
-                      },
-                      // ✨ 4. 두 날짜 모두 달력에 표시되도록 수정
-                      selectedDayPredicate: (day) {
-                        return isSameDay(startDate, day) ||
-                            isSameDay(endDate, day);
-                      },
-                      headerStyle: const HeaderStyle(
-                        formatButtonVisible: false,
-                        titleCentered: true,
-
-                        leftChevronIcon: Icon(
-                          Icons.arrow_left_outlined,
-                          color: Colors.grey, // 색상 변경
-                          size: 40,
-                          // 크기 변경
-                        ),
-                        // 오른쪽 화살표 아이콘을 원하는 모양으로 변경
-                        rightChevronIcon: Icon(
-                          Icons.arrow_right_outlined,
-                          color: Colors.grey,
-                          size: 40,
-                        ),
-                      ),
-                      calendarStyle: const CalendarStyle(
-                        todayDecoration: BoxDecoration(
-                          color: Colors.transparent,
-                          shape: BoxShape.circle,
-                        ),
-                        todayTextStyle: TextStyle(color: Colors.black),
-                        selectedDecoration: BoxDecoration(
-                          color: Color(0xFF121212),
-                          shape: BoxShape.circle,
-                        ),
-                        selectedTextStyle: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
+  DateTime startDate = DateTime.now().subtract(const Duration(days: 7));
+  DateTime endDate = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
@@ -227,10 +23,23 @@ class _StatisticsAllScreenState extends State<StatisticsAllScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("2025.1.1 - 2025.9.6"),
+              Text(
+                "${DateFormat('yyyy.M.d').format(startDate)} - ${DateFormat('yyyy.M.d').format(endDate)}",
+              ),
               IconButton(
-                onPressed: () {
-                  showCalendarDialog(context);
+                onPressed: () async {
+                  final selectedDates = await showCalendarDialog(
+                    context,
+                    initialStartDate: startDate,
+                    initialEndDate: endDate,
+                  );
+
+                  if (selectedDates != null) {
+                    setState(() {
+                      startDate = selectedDates['startDate']!;
+                      endDate = selectedDates['endDate']!;
+                    });
+                  }
                 },
                 icon: const Icon(Icons.edit_outlined, size: 20),
               ),
@@ -274,4 +83,191 @@ class _StatisticsAllScreenState extends State<StatisticsAllScreen> {
       ),
     );
   }
+}
+
+Future<Map<String, DateTime>?> showCalendarDialog(
+  BuildContext context, {
+  required DateTime initialStartDate,
+  required DateTime initialEndDate,
+}) async {
+  return await showDialog<Map<String, DateTime>>(
+    context: context,
+    builder: (BuildContext context) {
+      DateTime localStartDate = initialStartDate;
+      DateTime localEndDate = initialEndDate;
+      bool isSelectingStartDate = true;
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Dialog(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        width: 25,
+                        height: 25,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF121212),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints(),
+                          onPressed: () {
+                            // '저장' 시 선택된 날짜들을 Map에 담아 반환
+                            Navigator.of(context).pop({
+                              'startDate': localStartDate,
+                              'endDate': localEndDate,
+                            });
+                          },
+                          icon: Icon(
+                            Icons.check_outlined,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      Container(
+                        width: 25,
+                        height: 25,
+                        decoration: BoxDecoration(
+                          color: Color(0xFF121212),
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: BoxConstraints(),
+                          onPressed: () {
+                            // '닫기' 시 null을 반환하며 닫힘
+                            Navigator.of(context).pop();
+                          },
+                          icon: Icon(
+                            Icons.close_outlined,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(color: Color(0xFF121212), width: 1.4),
+                      color: const Color(0xFFD9D9D9),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Icon(Icons.calendar_month_outlined, size: 20),
+                          TextButton(
+                            onPressed:
+                                () =>
+                                    setState(() => isSelectingStartDate = true),
+                            style: TextButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                            ),
+                            child: Text(
+                              DateFormat('MMM d, yyyy').format(localStartDate),
+                              style: TextStyle(
+                                color:
+                                    isSelectingStartDate
+                                        ? Color(0xFF121212)
+                                        : Color(0xFF757575),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed:
+                                () => setState(
+                                  () => isSelectingStartDate = false,
+                                ),
+                            style: TextButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                            ),
+                            child: Text(
+                              DateFormat('MMM d, yyyy').format(localEndDate),
+                              style: TextStyle(
+                                color:
+                                    !isSelectingStartDate
+                                        ? Color(0xFF121212)
+                                        : Color(0xFF757575),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  TableCalendar(
+                    focusedDay:
+                        (isSelectingStartDate ? localStartDate : localEndDate),
+                    firstDay: DateTime.utc(2020, 1, 1),
+                    lastDay: DateTime.utc(2030, 12, 31),
+                    onDaySelected: (selectedDay, focusedDay) {
+                      setState(() {
+                        if (isSelectingStartDate) {
+                          localStartDate = selectedDay;
+                          isSelectingStartDate = false;
+                        } else {
+                          if (!selectedDay.isBefore(localStartDate)) {
+                            localEndDate = selectedDay;
+                          }
+                        }
+                      });
+                    },
+                    selectedDayPredicate: (day) {
+                      return isSameDay(localStartDate, day) ||
+                          isSameDay(localEndDate, day);
+                    },
+                    headerStyle: const HeaderStyle(
+                      formatButtonVisible: false,
+                      titleCentered: true,
+                      leftChevronIcon: Icon(
+                        Icons.arrow_left_outlined,
+                        color: Color(0xFF757575),
+                        size: 40,
+                      ),
+                      rightChevronIcon: Icon(
+                        Icons.arrow_right_outlined,
+                        color: Color(0xFF757575),
+                        size: 40,
+                      ),
+                    ),
+                    calendarStyle: const CalendarStyle(
+                      todayDecoration: BoxDecoration(color: Colors.transparent),
+                      todayTextStyle: TextStyle(color: Colors.black),
+                      selectedDecoration: BoxDecoration(
+                        color: Color(0xFF121212),
+                        shape: BoxShape.circle,
+                      ),
+                      selectedTextStyle: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
 }
