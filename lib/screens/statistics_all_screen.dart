@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focused_study_time_tracker/components/box_design.dart';
 import 'package:focused_study_time_tracker/widgets/bar_chart_widget.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -47,74 +48,32 @@ class _StatisticsAllScreenState extends State<StatisticsAllScreen> {
             ],
           ),
           const SizedBox(height: 10),
-          Stack(
-            children: [
-              Positioned(
-                child: Transform.translate(
-                  offset: Offset(5, 5),
-                  child: Container(
-                    width: 300,
-                    height: 300,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.black),
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.black),
-                  color: Colors.white,
-                ),
-                child: const BarChartWidget(),
-              ),
-            ],
+          BoxDesign(
+            backgroundcolor: Colors.white,
+            designcolor: Color(0xFFD9D9D9),
+            width: 300,
+            height: 300,
+            child: const BarChartWidget(),
           ),
           const SizedBox(height: 30),
-          Stack(
-            children: [
-              Positioned(
-                child: Transform.translate(
-                  offset: Offset(5, 5),
-                  child: Container(
-                    width: 300,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.black),
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                width: 300,
-                height: 200,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.black),
-                ),
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("최대 집중 시간대 : 23시"),
-                    Text("최소 집중 시간대 : 6시"),
-                    SizedBox(height: 20),
-                    Text("하루 평균 집중 시간 : 10시간"),
-                    SizedBox(height: 20),
-                    Text("- - - - - - - - - - - - - - - - - - - - - - - -"),
-                    SizedBox(height: 20),
-                    Text("ㅇㅇ님은 총 ㅇㅇㅇㅇ시간 집중했어요!"),
-                  ],
-                ),
-              ),
-            ],
+          BoxDesign(
+            backgroundcolor: Colors.white,
+            designcolor: Color(0xFFD9D9D9),
+            width: 300,
+            height: 200,
+            child: const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("최대 집중 시간대 : 23시"),
+                Text("최소 집중 시간대 : 6시"),
+                SizedBox(height: 20),
+                Text("하루 평균 집중 시간 : 10시간"),
+                SizedBox(height: 15),
+                Text("- - - - - - - - - - - - - - - - - - - - - - - -"),
+                SizedBox(height: 15),
+                Text("ㅇㅇ님은 총 ㅇㅇㅇㅇ시간 집중했어요!"),
+              ],
+            ),
           ),
         ],
       ),
@@ -147,7 +106,7 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                     IconButton(
                       icon: Icon(
                         Icons.arrow_left_outlined,
-                        color: Color(0xFF757575),
+                        color: Color(0xFFD9D9D9),
                         size: 40,
                       ),
                       onPressed: () {
@@ -169,7 +128,7 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                     IconButton(
                       icon: Icon(
                         Icons.arrow_right_outlined,
-                        color: Color(0xFF757575),
+                        color: Color(0xFFD9D9D9),
                         size: 40,
                       ),
                       onPressed: () {
@@ -441,12 +400,12 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                         titleCentered: true,
                         leftChevronIcon: Icon(
                           Icons.arrow_left_outlined,
-                          color: Color(0xFF757575),
+                          color: Color(0xFFD9D9D9),
                           size: 40,
                         ),
                         rightChevronIcon: Icon(
                           Icons.arrow_right_outlined,
-                          color: Color(0xFF757575),
+                          color: Color(0xFFD9D9D9),
                           size: 40,
                         ),
                       ),
@@ -454,6 +413,7 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                       calendarStyle: const CalendarStyle(
                         todayDecoration: BoxDecoration(
                           color: Colors.transparent,
+                          shape: BoxShape.circle,
                         ),
                         todayTextStyle: TextStyle(color: Colors.black),
                         selectedDecoration: BoxDecoration(
