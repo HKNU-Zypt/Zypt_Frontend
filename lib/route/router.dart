@@ -12,11 +12,18 @@ import 'package:focused_study_time_tracker/screens/statistics_screen.dart';
 import 'package:focused_study_time_tracker/screens/streaming_join_screen.dart';
 import 'package:focused_study_time_tracker/screens/terms_of_service_screen.dart';
 import 'package:go_router/go_router.dart';
+import 'package:focused_study_time_tracker/services/login.dart';
 
 final router = GoRouter(
   initialLocation: '/home',
   debugLogDiagnostics: true,
   redirect: (context, state) async {
+    final String currentPath = state.uri.path;
+    final bool loggedIn = await LoginService().isLoggedIn();
+
+    if (!loggedIn && currentPath != '/login') {
+      return '/login';
+    }
     return null;
   },
   routes: [
@@ -55,7 +62,7 @@ final router = GoRouter(
       path: '/focus-v2',
       builder: (context, state) => FocusTimeScreenV2(),
     ),
-    
+
     GoRoute(
       path: '/opensource',
       builder: (context, state) => OpenSourceInfoScreen(),
