@@ -13,78 +13,11 @@ class MyPageScreen extends StatefulWidget {
 }
 
 class _MyPageScreenState extends State<MyPageScreen> {
+  String _nickname = "나는야똑똑이";
+
   @override
   Widget build(BuildContext context) {
     final loginService = LoginService();
-
-    // 닉네임 수정 버튼을 눌렀을 때 팝업 창이 나오게 하는 함수.
-    void showNicknameDialog() {
-      final TextEditingController controller = TextEditingController();
-
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            // 다이얼로그 모서리를 둥글게 설정
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16.0),
-            ),
-            title: Stack(
-              alignment: Alignment.center,
-              children: [
-                // 1. 중앙 정렬된 제목 텍스트
-                const Text(
-                  '닉네임 변경',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                // 2. 오른쪽 정렬된 X 아이콘 버튼
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      // 버튼을 누르면 팝업창을 닫습니다.
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ),
-              ],
-            ),
-            content: TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                hintText: '새 닉네임을 입력하세요',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            actions: <Widget>[
-              // 버튼을 중앙에 꽉 채워서 배치
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[800],
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: const Text('변경사항 저장'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ),
-            ],
-            // actions 위젯 주변의 기본 여백 제거
-            actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-          );
-        },
-      );
-    }
 
     return Container(
       color: Colors.white,
@@ -116,7 +49,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "나는야똑똑이",
+                                _nickname,
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w500,
@@ -140,8 +73,16 @@ class _MyPageScreenState extends State<MyPageScreen> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           IconButton(
-                            onPressed: () {
-                              showNicknameDialog();
+                            onPressed: () async {
+                              final newNickname = await showNicknameDialog(
+                                context,
+                              );
+                              if (newNickname != null &&
+                                  newNickname.isNotEmpty) {
+                                setState(() {
+                                  _nickname = newNickname;
+                                });
+                              }
                             },
                             icon: Icon(Icons.edit_outlined, size: 17),
                           ),
@@ -217,4 +158,62 @@ class _MyPageScreenState extends State<MyPageScreen> {
       ),
     );
   }
+}
+
+Future<String?> showNicknameDialog(BuildContext context) async {
+  final TextEditingController controller = TextEditingController();
+
+  return await showDialog<String>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        title: Stack(
+          alignment: Alignment.center,
+          children: [
+            const Text('닉네임 변경', style: TextStyle(fontWeight: FontWeight.bold)),
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+          ],
+        ),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: '새 닉네임을 입력하세요',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        actions: <Widget>[
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[800],
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: const Text('변경사항 저장'),
+              onPressed: () {
+                Navigator.of(context).pop(controller.text);
+              },
+            ),
+          ),
+        ],
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      );
+    },
+  );
 }

@@ -17,7 +17,6 @@ class _RecordListScreenState extends State<RecordListScreen> {
   @override
   void initState() {
     super.initState();
-    // 초기 선택일을 오늘로 설정
     _selectedDay = _focusedDay;
   }
 
@@ -41,32 +40,22 @@ class _RecordListScreenState extends State<RecordListScreen> {
                   height: 400,
                   child: TableCalendar(
                     locale: 'en_US',
-                    // 상태 변수를 사용
                     focusedDay: _focusedDay,
                     firstDay: DateTime.utc(2020, 1, 1),
                     lastDay: DateTime.utc(2030, 12, 31),
 
-                    // ✨ 2. 날짜 선택 기능을 다시 활성화
                     onDaySelected: (selectedDay, focusedDay) {
-                      // setState를 호출하여 화면을 새로고침
                       setState(() {
                         _selectedDay = selectedDay;
-                        // ✨ focusedDay도 함께 업데이트하여 캘린더 뷰를 이동시킴
                         _focusedDay = focusedDay;
                       });
                     },
-
-                    // ✨ 3. selectedDayPredicate가 상태 변수를 바라보도록 수정
                     selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-
-                    // 사용자가 페이지를 스와이프했을 때 focusedDay를 업데이트
                     onPageChanged: (focusedDay) {
-                      // ✨ setState를 호출하여 화면을 새로고침하도록 변경
                       setState(() {
                         _focusedDay = focusedDay;
                       });
                     },
-
                     headerStyle: HeaderStyle(
                       titleCentered: true,
                       titleTextFormatter:
@@ -77,7 +66,6 @@ class _RecordListScreenState extends State<RecordListScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                       formatButtonVisible: false,
-                      // ✨ 4. 화살표를 다시 보이도록 설정 (기본값이 true라 사실 이 줄들은 생략 가능)
                       leftChevronIcon: Icon(
                         Icons.arrow_left_outlined,
                         color: Color(0xFFD9D9D9),
@@ -89,8 +77,6 @@ class _RecordListScreenState extends State<RecordListScreen> {
                         size: 40,
                       ),
                     ),
-
-                    // ✨ 3. range 관련 스타일을 제거하고 selectedDecoration만 사용합니다.
                     calendarStyle: const CalendarStyle(
                       todayDecoration: BoxDecoration(
                         color: Colors.transparent,

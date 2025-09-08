@@ -153,7 +153,6 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                   itemBuilder: (context, index) {
                     final month = index + 1;
 
-                    // --- ✨ 1. 현재 월이 선택된 날짜의 월인지 확인하는 로직 ---
                     bool isSelectedMonth = false;
                     // '시작 날짜' 선택 모드일 때
                     if (isSelectingStartDate) {
@@ -192,22 +191,21 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                           }
                         });
                       },
-                      // --- ✨ 2. isSelectedMonth 값에 따라 동적으로 스타일 적용 ---
                       child: Container(
                         padding: const EdgeInsets.all(8.0),
                         decoration:
                             isSelectedMonth
                                 ? BoxDecoration(
-                                  color: Color(0xFF121212), // 선택된 월 배경색
+                                  color: Color(0xFF121212),
                                   shape: BoxShape.circle,
                                 )
-                                : null, // 선택되지 않았으면 아무 스타일 없음
+                                : null,
                         child: Text(
                           DateFormat('MMM').format(DateTime(0, month)),
                           style: TextStyle(
                             color:
                                 isSelectedMonth ? Colors.white : Colors.black,
-                            fontSize: 10, // 선택 여부에 따른 글자색
+                            fontSize: 10,
                           ),
                         ),
                       ),
@@ -295,15 +293,11 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                             icon: Icon(Icons.calendar_month_outlined, size: 20),
                             onPressed: () {
                               setState(() {
-                                // ✨ 1. 피커를 열기 전에, 현재 선택 모드에 따라 focusedDay를 설정합니다.
                                 if (isSelectingStartDate) {
-                                  // '시작 날짜' 선택 모드이면, focusedDay를 startDate로 설정
                                   focusedDay = localStartDate;
                                 } else {
-                                  // '종료 날짜' 선택 모드이면, focusedDay를 endDate로 설정
                                   focusedDay = localEndDate;
                                 }
-                                // ✨ 2. 뷰를 전환합니다.
                                 isShowingPicker = !isShowingPicker;
                               });
                             },
@@ -312,7 +306,6 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                             onPressed: () {
                               setState(() {
                                 isSelectingStartDate = true;
-                                // ✨ 1. focusedDay를 startDate로 설정하여 캘린더 뷰를 이동시킵니다.
                                 focusedDay = localStartDate;
                               });
                             },
@@ -332,7 +325,6 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                             onPressed: () {
                               setState(() {
                                 isSelectingStartDate = false;
-                                // ✨ 2. focusedDay를 endDate로 설정하여 캘린더 뷰를 이동시킵니다.
                                 focusedDay = localEndDate;
                               });
                             },
@@ -360,20 +352,15 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                       focusedDay: focusedDay,
                       firstDay: DateTime.utc(2020, 1, 1),
                       lastDay: DateTime.utc(2030, 12, 31),
-                      // ✨ 1. onRangeSelected 대신 onDaySelected를 다시 사용합니다.
                       onDaySelected: (selectedDay, newFocusedDay) {
                         setState(() {
                           if (isSelectingStartDate) {
                             localStartDate = selectedDay;
-                            // 시작 날짜가 기존 종료 날짜보다 뒤에 있는지 확인
                             if (localEndDate.isBefore(localStartDate)) {
-                              // 뒤에 있을 경우 종료 날짜를 시작 날짜와 같게 맞춰줌
                               localEndDate = localStartDate;
                             }
                             // 종료일 선택 모드로 전환
                             isSelectingStartDate = false;
-                            // ✨ 1. focusedDay를 newFocusedDay(클릭된 날짜)가 아닌,
-                            // ✨    기존의 localEndDate로 설정하여 뷰를 이동시킵니다.
                             focusedDay = localEndDate;
                           } else {
                             // 종료 날짜 선택 로직은 기존과 동일
@@ -390,7 +377,6 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                           focusedDay = newFocusedDay;
                         });
                       },
-                      // ✨ 2. selectedDayPredicate를 사용하여 두 날짜를 개별적으로 선택 표시합니다.
                       selectedDayPredicate: (day) {
                         return isSameDay(localStartDate, day) ||
                             isSameDay(localEndDate, day);
@@ -409,7 +395,6 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                           size: 40,
                         ),
                       ),
-                      // ✨ 3. range 관련 스타일을 제거하고 selectedDecoration만 사용합니다.
                       calendarStyle: const CalendarStyle(
                         todayDecoration: BoxDecoration(
                           color: Colors.transparent,
