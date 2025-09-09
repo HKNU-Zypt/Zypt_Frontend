@@ -36,7 +36,7 @@ class _StreamingScreenState extends State<StreamingScreen> {
         await _liveKitService.connect(widget.roomName, widget.participantName);
       }
       await _liveKitService.publishVideo();
-      await _liveKitService.publishAudio();
+      // 최초 진입 시 마이크는 자동 퍼블리시하지 않음
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
@@ -53,7 +53,10 @@ class _StreamingScreenState extends State<StreamingScreen> {
 
   @override
   void dispose() {
-    _liveKitService.disconnect();
+    debugPrint('zypt [StreamingScreen] dispose - start');
+    _liveKitService.disconnect().then((_) {
+      debugPrint('zypt [StreamingScreen] dispose - disconnect completed');
+    });
     super.dispose();
   }
 

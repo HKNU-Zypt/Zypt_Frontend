@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:livekit_client/livekit_client.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:focused_study_time_tracker/const.dart';
@@ -17,6 +18,7 @@ class LiveKitService {
   final LoginService _loginService = LoginService();
   VoidCallback? _roomListener;
   bool _useFrontCamera = true;
+  bool _isDisconnecting = false;
 
   // 참가자/미디어/연결 상태 브로드캐스트
   final ValueNotifier<ParticipantsState> participantsStateNotifier =
@@ -108,6 +110,13 @@ class LiveKitService {
 
   Future<void> connect(String roomName, String participantName) async {
     try {
+      // 기존 세션이 남아있다면 정리
+      if (_room != null) {
+        debugPrint(
+          'zypt [LiveKitService] connect - existing room found, disconnecting first',
+        );
+        await disconnect();
+      }
       // 백엔드에서 닉네임/식별자는 액세스 토큰으로 파생되므로 participantName은 서버에 전달하지 않습니다.
       _token = await _joinRoomAndGetToken(roomName);
       _room = Room();
@@ -130,6 +139,13 @@ class LiveKitService {
     int maxParticipant = 10,
   }) async {
     try {
+      // 기존 세션이 남아있다면 정리
+      if (_room != null) {
+        debugPrint(
+          'zypt [LiveKitService] createAndConnect - existing room found, disconnecting first',
+        );
+        await disconnect();
+      }
       _token = await _createRoomAndGetToken(
         roomName,
         maxParticipant: maxParticipant,
@@ -162,23 +178,43 @@ class LiveKitService {
   }
 
   Future<void> disconnect() async {
-    if (_room != null) {
-      await unpublishAll();
-      if (_roomListener != null) {
-        _room!.removeListener(_roomListener!);
-        _roomListener = null;
-      }
-      await _room!.disconnect();
-      _room = null;
+    if (_isDisconnecting) {
+      return;
     }
-    // 상태 초기화
-    participantsStateNotifier.value = const ParticipantsState(
-      localParticipant: null,
-      remoteParticipants: [],
-    );
-    cameraEnabledNotifier.value = false;
-    microphoneEnabledNotifier.value = false;
-    connectionStateNotifier.value = ConnectionState.disconnected;
+    _isDisconnecting = true;
+    try {
+      if (_room != null) {
+        try {
+          // 빠른 해제를 위해 우선 Room.disconnect() 호출
+        } catch (e) {
+          debugPrint('zypt [LiveKitService] unpublishAll error: $e');
+        }
+        try {
+          if (_roomListener != null) {
+            _room!.removeListener(_roomListener!);
+            _roomListener = null;
+          }
+        } catch (e) {
+          debugPrint('zypt [LiveKitService] removeListener error: $e');
+        }
+        try {
+          await _room!.disconnect();
+        } catch (e) {
+          debugPrint('zypt [LiveKitService] room.disconnect error: $e');
+        }
+        _room = null;
+      }
+    } finally {
+      // 상태 초기화
+      participantsStateNotifier.value = const ParticipantsState(
+        localParticipant: null,
+        remoteParticipants: [],
+      );
+      cameraEnabledNotifier.value = false;
+      microphoneEnabledNotifier.value = false;
+      connectionStateNotifier.value = ConnectionState.disconnected;
+      _isDisconnecting = false;
+    }
   }
 
   Room get room {
@@ -246,12 +282,21 @@ class LiveKitService {
     await unpublishAudio();
   }
 
-  // 권한 보장(1차: 최소 구현 - 플랫폼 기본 권한 요청 흐름에 위임)
+  // 권한 보장: 카메라/마이크 런타임 권한 요청
   Future<void> ensurePermissions() async {
-    // 추후 permission_handler 또는 SDK 내 권한 유틸을 연동할 수 있습니다.
-    // 현재 단계에서는 setCameraEnabled/setMicrophoneEnabled 호출 시
-    // 플랫폼 권한 프롬프트에 위임합니다.
-    return;
+    final statuses = await [Permission.camera, Permission.microphone].request();
+
+    final cameraGranted =
+        statuses[Permission.camera] == PermissionStatus.granted;
+    final micGranted =
+        statuses[Permission.microphone] == PermissionStatus.granted;
+
+    if (!cameraGranted) {
+      throw Exception('카메라 권한이 필요합니다. 설정에서 권한을 허용하세요.');
+    }
+    if (!micGranted) {
+      throw Exception('마이크 권한이 필요합니다. 설정에서 권한을 허용하세요.');
+    }
   }
 
   // --- 편의 API ---
