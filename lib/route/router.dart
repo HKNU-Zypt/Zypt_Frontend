@@ -14,7 +14,7 @@ import 'package:focused_study_time_tracker/screens/terms_of_service_screen.dart'
 import 'package:go_router/go_router.dart';
 
 final router = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/login',
   debugLogDiagnostics: true,
   redirect: (context, state) async {
     return null;
