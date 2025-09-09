@@ -17,7 +17,7 @@ import 'package:go_router/go_router.dart';
 import 'package:focused_study_time_tracker/services/login.dart';
 
 final router = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/login',
   debugLogDiagnostics: true,
   redirect: (context, state) async {
     final String currentPath = state.uri.path;

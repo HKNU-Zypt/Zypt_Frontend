@@ -345,6 +345,14 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
               ),
             ),
           ),
+          Positioned(
+            bottom: 100,
+
+            child: Text(
+              '상태: $_focusStatus',
+              style: const TextStyle(fontSize: 20),
+            ),
+          ),
           // 하단 버튼들
           Positioned(
             bottom: 32,
