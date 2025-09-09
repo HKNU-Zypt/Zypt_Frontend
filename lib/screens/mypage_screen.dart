@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:focused_study_time_tracker/components/box_design.dart';
 import 'package:focused_study_time_tracker/services/login.dart';
 import 'package:focused_study_time_tracker/services/user_service.dart';
 import 'package:focused_study_time_tracker/components/main_button.dart';
@@ -12,78 +13,11 @@ class MyPageScreen extends StatefulWidget {
 }
 
 class _MyPageScreenState extends State<MyPageScreen> {
+  String _nickname = "나는야똑똑이";
+
   @override
   Widget build(BuildContext context) {
     final loginService = LoginService();
-
-    // 닉네임 수정 버튼을 눌렀을 때 팝업 창이 나오게 하는 함수.
-    void showNicknameDialog() {
-      final TextEditingController controller = TextEditingController();
-
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            // 다이얼로그 모서리를 둥글게 설정
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16.0),
-            ),
-            title: Stack(
-              alignment: Alignment.center,
-              children: [
-                // 1. 중앙 정렬된 제목 텍스트
-                const Text(
-                  '닉네임 변경',
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-                // 2. 오른쪽 정렬된 X 아이콘 버튼
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      // 버튼을 누르면 팝업창을 닫습니다.
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ),
-              ],
-            ),
-            content: TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                hintText: '새 닉네임을 입력하세요',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            actions: <Widget>[
-              // 버튼을 중앙에 꽉 채워서 배치
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey[800],
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: const Text('변경사항 저장'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ),
-            ],
-            // actions 위젯 주변의 기본 여백 제거
-            actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-          );
-        },
-      );
-    }
 
     return Container(
       color: Colors.white,
@@ -99,110 +33,89 @@ class _MyPageScreenState extends State<MyPageScreen> {
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 30),
-                // 프로필 박스
-                Stack(
-                  children: [
-                    Positioned(
-                      child: Transform.translate(
-                        offset: Offset(5, 5),
-                        child: Container(
-                          width: 322,
-                          height: 102,
-                          decoration: BoxDecoration(
-                            color: Colors.grey,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.black, width: 1),
+                BoxDesign(
+                  backgroundcolor: Colors.white,
+                  designcolor: Color(0xFFD9D9D9),
+                  width: 320,
+                  height: 100,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Padding(
+                          padding: const EdgeInsets.all(4),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _nickname,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              Text(
+                                "abcdabcd@naver.com",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                      child: Container(
-                        width: 320,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(color: Colors.black, width: 1),
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color.fromARGB(255, 147, 147, 147),
-                              offset: Offset(6, 6),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                      SizedBox(width: 20),
+                      // 닉네임 변경 아이콘 버튼
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          IconButton(
+                            onPressed: () async {
+                              final newNickname = await showNicknameDialog(
+                                context,
+                              );
+                              if (newNickname != null &&
+                                  newNickname.isNotEmpty) {
+                                setState(() {
+                                  _nickname = newNickname;
+                                });
+                              }
+                            },
+                            icon: Icon(Icons.edit_outlined, size: 17),
+                          ),
+                        ],
+                      ),
+                      Spacer(),
+                      // 프로필 사진 부분
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Padding(
-                                padding: const EdgeInsets.all(4),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "나는야똑똑이",
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      "abcdabcd@naver.com",
-                                      style: TextStyle(
-                                        fontSize: 10,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ],
+                            Container(
+                              width: 50,
+                              height: 50,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.black,
+                                  width: 2,
                                 ),
+                                color: Colors.white,
                               ),
-                            ),
-                            SizedBox(width: 20),
-                            // 닉네임 변경 아이콘 버튼
-                            Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                IconButton(
-                                  onPressed: () {
-                                    showNicknameDialog();
-                                  },
-                                  icon: Icon(Icons.edit_outlined, size: 17),
-                                ),
-                              ],
-                            ),
-                            Spacer(),
-                            // 프로필 사진 부분
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                children: [
-                                  Container(
-                                    width: 50,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.black,
-                                        width: 2,
-                                      ),
-                                      color: Colors.white,
-                                    ),
-                                    alignment: Alignment.center,
-                                    child: Icon(Icons.face, size: 35),
-                                  ),
-                                ],
-                              ),
+                              alignment: Alignment.center,
+                              child: Icon(Icons.face, size: 35),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
 
+                // 프로필 박스
                 SizedBox(height: 30),
                 MainButton.medium(
                   title: '로그아웃',
@@ -245,4 +158,62 @@ class _MyPageScreenState extends State<MyPageScreen> {
       ),
     );
   }
+}
+
+Future<String?> showNicknameDialog(BuildContext context) async {
+  final TextEditingController controller = TextEditingController();
+
+  return await showDialog<String>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        title: Stack(
+          alignment: Alignment.center,
+          children: [
+            const Text('닉네임 변경', style: TextStyle(fontWeight: FontWeight.bold)),
+            Align(
+              alignment: Alignment.centerRight,
+              child: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+          ],
+        ),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            hintText: '새 닉네임을 입력하세요',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        actions: <Widget>[
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey[800],
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+              ),
+              child: const Text('변경사항 저장'),
+              onPressed: () {
+                Navigator.of(context).pop(controller.text);
+              },
+            ),
+          ),
+        ],
+        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      );
+    },
+  );
 }
