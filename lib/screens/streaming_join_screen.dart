@@ -7,6 +7,7 @@ import 'package:focused_study_time_tracker/screens/streaming_screen.dart';
 import 'package:focused_study_time_tracker/services/livekit.dart';
 import 'package:focused_study_time_tracker/services/user_service.dart';
 import 'package:focused_study_time_tracker/components/circle_icon_button.dart';
+import 'package:go_router/go_router.dart';
 
 class StreamingJoinScreen extends StatefulWidget {
   const StreamingJoinScreen({super.key});
@@ -126,15 +127,19 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
           maxParticipant: maxParticipant,
         );
         if (!mounted) return;
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder:
-                (context) => StreamingScreen(
-                  roomName: roomName,
-                  participantName: nickname,
-                ),
-          ),
+        // Navigator.push(
+        //   context,
+        //   MaterialPageRoute(
+        //     builder:
+        //         (context) => StreamingScreen(
+        //           roomName: roomName,
+        //           participantName: nickname,
+        //         ),
+        //   ),
+        // );
+        context.push(
+          '/streaming_room',
+          extra: {'roomName': roomName, 'participantName': nickname},
         );
       } catch (e) {
         if (!mounted) return;
@@ -206,7 +211,7 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
             Text(
               'Start Your Day &\nBe Productive',
               style: TextStyle(
-                fontSize: 32,
+                fontSize: 30,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'SoyoMaple',
               ),
@@ -251,15 +256,22 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
                                       '나';
                                   if (!mounted) return;
                                   // 연결은 StreamingScreen에서 수행
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder:
-                                          (context) => StreamingScreen(
-                                            roomName: room.name,
-                                            participantName: nickname,
-                                          ),
-                                    ),
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder:
+                                  //         (context) => StreamingScreen(
+                                  //           roomName: room.name,
+                                  //           participantName: nickname,
+                                  //         ),
+                                  //   ),
+                                  // );
+                                  context.push(
+                                    '/streaming_room',
+                                    extra: {
+                                      'roomName': room.name,
+                                      'participantName': nickname,
+                                    },
                                   );
                                 } catch (e) {
                                   print(e);

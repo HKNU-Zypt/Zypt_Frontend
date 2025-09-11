@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:focused_study_time_tracker/components/box_design.dart';
+import 'package:focused_study_time_tracker/components/statsCard.dart';
 import 'package:focused_study_time_tracker/widgets/bar_chart_widget.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -21,60 +22,78 @@ class _StatisticsAllScreenState extends State<StatisticsAllScreen> {
       child: Column(
         children: [
           const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "${DateFormat('yyyy.M.d').format(startDate)} ~ ${DateFormat('yyyy.M.d').format(endDate)}",
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              IconButton(
-                onPressed: () async {
-                  final selectedDates = await showCalendarDialog(
-                    context,
-                    initialStartDate: startDate,
-                    initialEndDate: endDate,
-                  );
+          Padding(
+            padding: const EdgeInsets.only(left: 16), // ← 원하는 만큼 조절 (예: 16)
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "${DateFormat('yyyy.M.d').format(startDate)} ~ ${DateFormat('yyyy.M.d').format(endDate)}",
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                IconButton(
+                  onPressed: () async {
+                    final selectedDates = await showCalendarDialog(
+                      context,
+                      initialStartDate: startDate,
+                      initialEndDate: endDate,
+                    );
 
-                  if (selectedDates != null) {
-                    setState(() {
-                      startDate = selectedDates['startDate']!;
-                      endDate = selectedDates['endDate']!;
-                    });
-                  }
-                },
-                icon: const Icon(Icons.edit_outlined, size: 20),
-              ),
-            ],
+                    if (selectedDates != null) {
+                      setState(() {
+                        startDate = selectedDates['startDate']!;
+                        endDate = selectedDates['endDate']!;
+                      });
+                    }
+                  },
+                  icon: const Icon(Icons.edit_outlined, size: 20),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 10),
-          BoxDesign(
-            backgroundcolor: Colors.white,
-            designcolor: Color(0xFFD9D9D9),
-            width: 300,
-            height: 300,
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              border: const Border(
+                bottom: BorderSide(
+                  color: Color.fromARGB(255, 150, 151, 150),
+                  width: 1,
+                ),
+              ),
+              borderRadius: BorderRadius.circular(0), // 양쪽 둥글게 안 할 경우 0
+            ),
             child: const BarChartWidget(),
           ),
           const SizedBox(height: 30),
-          BoxDesign(
-            backgroundcolor: Colors.white,
-            designcolor: Color(0xFFD9D9D9),
-            width: 300,
-            height: 200,
+          OffsetOutlinedCard(
+            padding: const EdgeInsets.fromLTRB(60, 16, 60, 16),
             child: const Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("최대 집중 시간대 : 23시"),
-                Text("최소 집중 시간대 : 6시"),
-                SizedBox(height: 20),
-                Text("하루 평균 집중 시간 : 10시간"),
-                SizedBox(height: 15),
-                Text("- - - - - - - - - - - - - - - - - - - - - - - -"),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [Text("최대 집중 시간대 : "), Text("23시")],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                  children: [Text("최소 집중 시간대 : "), Text("6시")],
+                ),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [Text("하루 평균 집중 시간 : "), Text("10시")],
+                ),
+                Divider(thickness: 1.2, color: Colors.black87, height: 32),
+
                 SizedBox(height: 15),
                 Text("ㅇㅇ님은 총 ㅇㅇㅇㅇ시간 집중했어요!"),
               ],
             ),
           ),
+          SizedBox(height: 40),
         ],
       ),
     );
