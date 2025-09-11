@@ -12,6 +12,7 @@ import 'package:focused_study_time_tracker/screens/record_list_screen.dart';
 import 'package:focused_study_time_tracker/screens/statistics_screen.dart';
 import 'package:focused_study_time_tracker/screens/statistics_screenV2.dart';
 import 'package:focused_study_time_tracker/screens/streaming_join_screen.dart';
+import 'package:focused_study_time_tracker/screens/streaming_screen.dart';
 import 'package:focused_study_time_tracker/screens/terms_of_service_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:focused_study_time_tracker/services/login.dart';
@@ -72,6 +73,19 @@ final router = GoRouter(
     GoRoute(
       path: '/terms',
       builder: (context, state) => TermsOfServiceScreen(),
+    ),
+    // router.dart에 GoRoute 정의
+    GoRoute(
+      path: '/streaming_room',
+      builder: (context, state) {
+        final roomName = (state.extra as Map?)?['roomName'] as String? ?? '';
+        final participantName =
+            (state.extra as Map?)?['participantName'] as String? ?? '';
+        return StreamingScreen(
+          roomName: roomName,
+          participantName: participantName,
+        );
+      },
     ),
   ],
 );

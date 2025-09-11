@@ -25,7 +25,11 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
       appBar: AppBar(
         title: Text(
           "통계",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'SoyoMaple',
+          ),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
@@ -51,6 +55,7 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
                   "전체 통계",
                   style: TextStyle(
                     color: Colors.black, // 텍스트 색상 변경
+                    fontFamily: 'SoyoMaple',
                   ),
                 ),
               ),
@@ -65,13 +70,20 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
                   backgroundColor: Colors.white,
                 ),
                 onPressed: () => setState(() => _selectedIndex = 1),
-                child: Text("기록 리스트", style: TextStyle(color: Colors.black)),
+                child: Text(
+                  "기록 리스트",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontFamily: 'SoyoMaple',
+                  ),
+                ),
               ),
             ],
           ),
-
-          // 본문 화면 전환
-          Expanded(child: _screens[_selectedIndex]),
+          // 본문 화면 스크롤 영역
+          Expanded(
+            child: SingleChildScrollView(child: _screens[_selectedIndex]),
+          ),
         ],
       ),
     );

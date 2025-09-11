@@ -41,10 +41,12 @@ class BarChartWidget extends StatelessWidget {
         title: AxisTitle(text: '시간대', textStyle: TextStyle(fontSize: 10)),
         majorGridLines: MajorGridLines(width: 0), // X축 주 격자 제거
         axisLine: AxisLine(width: 0), // X축 선 제거
+        interval: 1,
+        labelStyle: TextStyle(fontSize: 9),
       ),
       primaryYAxis: const NumericAxis(
-        title: AxisTitle(text: '누적 집중 시간', textStyle: TextStyle(fontSize: 10)),
-        majorGridLines: MajorGridLines(width: 0), // Y축 주 격자 제거
+        majorGridLines: MajorGridLines(width: 1), // Y축 주 격자 제거
+
         axisLine: AxisLine(width: 0), // Y축 선 제거
       ),
       series: <CartesianSeries<StudyData, String>>[
