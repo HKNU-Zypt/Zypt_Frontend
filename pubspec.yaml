@@ -44,7 +44,7 @@ dependencies:
   image_picker: ^1.0.7
 
   livekit_client: ^2.4.5
-  livekit_components: ^1.2.1
+  livekit_components: ^1.2.2+hotfix.1
   crypto: ^3.0.3
   http: ^1.2.0
   intl: ^0.19.0

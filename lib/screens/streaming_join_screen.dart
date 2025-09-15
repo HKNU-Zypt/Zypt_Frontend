@@ -7,7 +7,6 @@ import 'package:focused_study_time_tracker/services/livekit.dart';
 import 'package:focused_study_time_tracker/services/user_service.dart';
 import 'package:focused_study_time_tracker/components/circle_icon_button.dart';
 import 'package:go_router/go_router.dart';
-import 'package:focused_study_time_tracker/components/form_dialog.dart';
 
 class StreamingJoinScreen extends StatefulWidget {
   const StreamingJoinScreen({super.key});
@@ -108,64 +107,6 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
     });
   }
 
-  Future<void> createRoom() async {
-    final result = await showFormDialog(
-      context,
-      title: '방 생성',
-      fields: [
-        FormDialogFieldConfig(
-          id: 'name',
-          hintText: '방 이름',
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return '방 이름을 입력해주세요';
-            }
-            return null;
-          },
-        ),
-        FormDialogFieldConfig(
-          id: 'max',
-          hintText: '최대 참가자',
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          validator: (value) {
-            final v = int.tryParse((value ?? '').trim());
-            if (v == null || v <= 0) {
-              return '최대 참가자를 숫자로 입력해주세요';
-            }
-            return null;
-          },
-        ),
-      ],
-      primaryButtonText: '생성하기',
-    );
-
-    if (result != null && mounted) {
-      final roomName = result['name']!;
-      final maxStr = result['max'];
-      final int maxParticipant = int.tryParse(maxStr ?? '') ?? 10;
-      final nickname = _nickname ?? await _userService.getNickname() ?? '나';
-      try {
-        // 방만 생성하고 연결은 StreamingScreen에서 수행
-        await _liveKitService.initialize();
-        await _liveKitService.createRoomOnServer(
-          roomName,
-          maxParticipant: maxParticipant,
-        );
-        if (!mounted) return;
-        context.push(
-          '/streaming_room',
-          extra: {'roomName': roomName, 'participantName': nickname},
-        );
-      } catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('방 생성/입장 실패: $e')));
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
@@ -184,13 +125,6 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
               iconColor: Colors.white,
             ),
             const SizedBox(width: 8),
-            CircleIconButton(
-              icon: Icons.add,
-              onTap: createRoom,
-              backgroundColor: Colors.white,
-              iconColor: Colors.black,
-              borderColor: Colors.grey,
-            ),
           ],
         ),
         actions: [
@@ -282,11 +216,16 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
                                   //         ),
                                   //   ),
                                   // );
+                                  // 입장 토큰 발급 후 라우팅
+                                  final token = await _liveKitService
+                                      .joinRoomAndGetToken(room.name);
+                                  if (!mounted) return;
                                   context.push(
                                     '/streaming_room',
                                     extra: {
                                       'roomName': room.name,
                                       'participantName': nickname,
+                                      'token': token,
                                     },
                                   );
                                 } catch (e) {

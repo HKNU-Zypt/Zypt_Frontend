@@ -43,15 +43,18 @@ class StreamingActions {
     final String nickname = await _userService.getNickname() ?? '나';
 
     try {
-      await _liveKitService.initialize();
-      await _liveKitService.createRoomOnServer(
+      final createdToken = await _liveKitService.createRoomAndGetToken(
         roomName,
         maxParticipant: maxParticipant,
       );
       if (!context.mounted) return;
       context.push(
         '/streaming_room',
-        extra: {'roomName': roomName, 'participantName': nickname},
+        extra: {
+          'roomName': roomName,
+          'participantName': nickname,
+          'token': createdToken,
+        },
       );
     } catch (e) {
       if (!context.mounted) return;

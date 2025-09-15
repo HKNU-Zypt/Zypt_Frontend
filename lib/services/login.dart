@@ -8,7 +8,6 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:focused_study_time_tracker/models/user.dart' as app_user;
 import 'package:focused_study_time_tracker/services/user_service.dart';
 import 'dart:convert';
 
