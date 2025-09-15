@@ -1,4 +1,5 @@
 import 'package:focused_study_time_tracker/layout/navigation_layout.dart';
+import 'package:focused_study_time_tracker/models/focus_time.dart';
 import 'package:focused_study_time_tracker/screens/focus_time_result_screen.dart';
 import 'package:focused_study_time_tracker/screens/focus_time_screen.dart';
 import 'package:focused_study_time_tracker/screens/focus_time_screenV2.dart';
@@ -48,7 +49,10 @@ final router = GoRouter(
         GoRoute(path: '/mypage', builder: (context, state) => MyPageScreen()),
         GoRoute(
           path: '/result',
-          builder: (context, state) => FocusResultScreen(),
+          builder: (context, state) {
+            final sessionData = state.extra as FocusTimeInsertDto;
+            return FocusResultScreen(sessionData: sessionData);
+          },
         ),
       ],
     ),

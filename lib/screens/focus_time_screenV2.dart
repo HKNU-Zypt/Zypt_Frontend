@@ -149,9 +149,9 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
   }
 
   // 세션을 마감하고 서버로 전송
-  void _finalizeAndPost() {
+  FocusTimeInsertDto? _finalizeAndPost() {
     try {
-      if (_sessionStartAt == null) return;
+      if (_sessionStartAt == null) return null;
       final DateTime endAt = DateTime.now();
 
       // 진행 중인 비집중 구간 마감
@@ -186,8 +186,10 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
               debugPrint('FocusTime POST 실패: $e');
             }),
       );
+      return dto;
     } catch (e) {
       debugPrint('세션 마감 중 오류: $e');
+      return null;
     }
   }
 
@@ -372,8 +374,14 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
                         _isLocked
                             ? null
                             : () {
-                              // 정지 기능 구현
-                              context.go('/result');
+                              // 1. _finalizeAndPost 함수를 호출하여 dto 데이터를 받습니다.
+                              final sessionData = _finalizeAndPost();
+
+                              // 2. 데이터가 null이 아닌지 확인합니다. (안전장치)
+                              if (sessionData != null) {
+                                // 3. 결과 화면으로 데이터를 전달하며 이동합니다.
+                                context.go('/result', extra: sessionData);
+                              }
                             },
                     child: Icon(Icons.pause, color: Colors.black),
                   ),

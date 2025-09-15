@@ -1,57 +1,62 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:focused_study_time_tracker/components/statsCard.dart';
 import 'package:focused_study_time_tracker/components/focus_line_bar.dart';
+import 'package:focused_study_time_tracker/models/focus_time.dart'; // DTO 모델 import
 
+// 1. 생성자를 통해 FocusTimeInsertDto 데이터를 전달받도록 수정합니다.
 class FocusResultScreen extends StatelessWidget {
-  FocusResultScreen({super.key});
+  final FocusTimeInsertDto sessionData;
 
-  DateTime now = DateTime.now();
-  var weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+  FocusResultScreen({super.key, required this.sessionData});
+
+  // 2. 예시 데이터를 모두 삭제합니다.
+  final DateTime now = DateTime.now();
+  final weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+
+  // 날짜와 시간(HH:mm:ss) 문자열을 DateTime 객체로 변환하는 헬퍼 함수
+  DateTime parseDateTime(String date, String time) {
+    return DateTime.parse('$date $time');
+  }
 
   @override
   Widget build(BuildContext context) {
-    // 예시 데이터
-    final stats = {
-      '공부 시간': '1시간',
-      '집중 시간': '55분',
-      '집중하지 못한 시간': '5분',
-      '졸음': '1번',
-      '집중하지 않음': '0번',
-    };
+    // 3. 전달받은 sessionData를 사용해 UI에 필요한 값들을 즉시 계산합니다.
+    final sessionStart = parseDateTime(
+      sessionData.createDate,
+      sessionData.startAt,
+    );
+    final sessionEnd = parseDateTime(sessionData.createDate, sessionData.endAt);
+    final totalStudyDuration = sessionEnd.difference(sessionStart);
 
-    // 집중 시작~끝 시간 예시
-    final times = ['11:30', '14:45'];
-    final unfocusTime = ['11:40', '11:45', '12:30', '13:40'];
+    Duration totalUnfocusedDuration = Duration.zero;
+    int sleepCount = 0;
+    int distractedCount = 0;
+    List<TimeInterval> unfocusedIntervals = [];
 
-    // HH:mm 형식의 문자열을 오늘 날짜의 DateTime 객체로 변환하는 함수
-    DateTime _onToday(String hhmm) {
-      final p = hhmm.split(':');
-      return DateTime(
-        now.year,
-        now.month,
-        now.day,
-        int.parse(p[0]),
-        int.parse(p[1]),
-      );
+    for (var unfocused in sessionData.fragmentedUnFocusedTimeInsertDtos) {
+      final start = parseDateTime(sessionData.createDate, unfocused.startAt);
+      final end = parseDateTime(sessionData.createDate, unfocused.endAt);
+      totalUnfocusedDuration += end.difference(start);
+
+      if (unfocused.type == UnFocusedType.SLEEP) {
+        sleepCount++;
+      } else {
+        distractedCount++;
+      }
+      unfocusedIntervals.add(TimeInterval(start, end));
     }
 
-    final startDt = _onToday(times.first);
-    final endDt = _onToday(times.last);
+    final totalFocusedDuration = totalStudyDuration - totalUnfocusedDuration;
 
-    // 집중하지 못한 구간 예시 , HH:mm 형식의 문자열 리스트
-    final unfocused = [
-      TimeInterval(
-        _onToday(unfocusTime[0]),
-        _onToday(unfocusTime[1]),
-      ), // 11:40~11:45
-      TimeInterval(
-        _onToday(unfocusTime[2]),
-        _onToday(unfocusTime[3]),
-      ), // 12:30~13:40
-    ];
+    final stats = {
+      '공부 시간': '${totalStudyDuration.inMinutes}분',
+      '집중 시간': '${totalFocusedDuration.inMinutes}분',
+      '집중하지 못한 시간': '${totalUnfocusedDuration.inMinutes}분',
+      '졸음': '$sleepCount번',
+      '집중하지 않음': '$distractedCount번',
+    };
 
+    // 4. 계산된 값을 사용하여 UI를 구성합니다.
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -79,10 +84,10 @@ class FocusResultScreen extends StatelessWidget {
             OffsetOutlinedCard(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
               child: FocusTimelineBar(
-                start: startDt, // 시작 시간
-                end: endDt, // 끝 시간
-                unfocused: unfocused, // 집중하지 못한 구간 리스트
-                height: 45, // 전체 높이
+                start: sessionStart,
+                end: sessionEnd,
+                unfocused: unfocusedIntervals,
+                height: 45,
               ),
             ),
             SizedBox(height: 20),
