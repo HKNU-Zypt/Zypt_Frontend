@@ -29,7 +29,10 @@ class _StatisticsAllScreenState extends State<StatisticsAllScreen> {
               children: [
                 Text(
                   "${DateFormat('yyyy.M.d').format(startDate)} ~ ${DateFormat('yyyy.M.d').format(endDate)}",
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'AppleSDGothicNeo-Bold',
+                  ),
                 ),
                 IconButton(
                   onPressed: () async {
@@ -125,7 +128,7 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                     IconButton(
                       icon: Icon(
                         Icons.arrow_left_outlined,
-                        color: Color(0xFFD9D9D9),
+                        color: Color(0xFFF95C3B),
                         size: 40,
                       ),
                       onPressed: () {
@@ -142,12 +145,13 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        fontFamily: 'AppleSDGothicNeo-Bold',
                       ),
                     ),
                     IconButton(
                       icon: Icon(
                         Icons.arrow_right_outlined,
-                        color: Color(0xFFD9D9D9),
+                        color: Color(0xFFF95C3B),
                         size: 40,
                       ),
                       onPressed: () {
@@ -215,7 +219,7 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                         decoration:
                             isSelectedMonth
                                 ? BoxDecoration(
-                                  color: Color(0xFF121212),
+                                  color: Color(0xFF407362),
                                   shape: BoxShape.circle,
                                 )
                                 : null,
@@ -224,7 +228,8 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                           style: TextStyle(
                             color:
                                 isSelectedMonth ? Colors.white : Colors.black,
-                            fontSize: 10,
+                            fontSize: 17,
+                            fontFamily: 'AppleSDGothicNeo-Bold',
                           ),
                         ),
                       ),
@@ -301,7 +306,7 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(30),
                       border: Border.all(color: Color(0xFF121212), width: 1.4),
-                      color: const Color(0xFFD9D9D9),
+                      color: const Color(0xFF6BAB93),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
@@ -309,7 +314,11 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.calendar_month_outlined, size: 20),
+                            icon: Icon(
+                              Icons.calendar_month_outlined,
+                              size: 25,
+                              color: Colors.black,
+                            ),
                             onPressed: () {
                               setState(() {
                                 if (isSelectingStartDate) {
@@ -335,8 +344,9 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                                     isSelectingStartDate
                                         ? Color(0xFF121212)
                                         : Color(0xFF757575),
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'AppleSDGothicNeo-Bold',
+                                fontSize: 16,
                               ),
                             ),
                           ),
@@ -354,8 +364,9 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                                     !isSelectingStartDate
                                         ? Color(0xFF121212)
                                         : Color(0xFF757575),
-                                fontWeight: FontWeight.w600,
-                                fontSize: 12,
+                                fontFamily: 'AppleSDGothicNeo-Bold',
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
                             ),
                           ),
@@ -403,28 +414,70 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                       headerStyle: const HeaderStyle(
                         formatButtonVisible: false,
                         titleCentered: true,
+                        titleTextStyle: TextStyle(
+                          color: Colors.black,
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'AppleSDGothicNeo-Bold',
+                        ),
                         leftChevronIcon: Icon(
                           Icons.arrow_left_outlined,
-                          color: Color(0xFFD9D9D9),
+                          color: Color(0xFFF95C3B),
                           size: 40,
                         ),
                         rightChevronIcon: Icon(
                           Icons.arrow_right_outlined,
-                          color: Color(0xFFD9D9D9),
+                          color: Color(0xFFF95C3B),
                           size: 40,
                         ),
                       ),
+                      // 1. 요일 스타일 설정
+                      daysOfWeekStyle: const DaysOfWeekStyle(
+                        // 평일 (월~금) 스타일
+                        weekdayStyle: TextStyle(
+                          fontFamily: 'AppleSDGothicNeo-Medium', // <-- 폰트 적용
+                          color: Colors.black,
+                        ),
+                        // 주말 (토~일) 스타일
+                        weekendStyle: TextStyle(
+                          fontFamily: 'AppleSDGothicNeo-Medium', // <-- 폰트 적용
+                          color: Colors.black,
+                        ),
+                      ),
                       calendarStyle: const CalendarStyle(
+                        // 기본 날짜 스타일 (가장 중요)
+                        defaultTextStyle: TextStyle(
+                          fontFamily: 'AppleSDGothicNeo-Medium', // <-- 폰트 적용
+                        ),
+
+                        // 주말 날짜 스타일
+                        weekendTextStyle: TextStyle(
+                          fontFamily: 'AppleSDGothicNeo-Medium', // <-- 폰트 적용
+                          color: Colors.black, // 주말은 보통 빨간색으로 표시
+                        ),
+
+                        // 다른 달의 날짜 스타일
+                        outsideTextStyle: TextStyle(
+                          fontFamily: 'AppleSDGGothicNeo-Medium', // <-- 폰트 적용
+                          color: Colors.black,
+                        ),
+
                         todayDecoration: BoxDecoration(
                           color: Colors.transparent,
                           shape: BoxShape.circle,
                         ),
-                        todayTextStyle: TextStyle(color: Colors.black),
+                        todayTextStyle: TextStyle(
+                          color: Colors.black,
+                          fontFamily: 'AppleSDGothicNeo-Medium', // <-- 폰트 적용
+                        ),
                         selectedDecoration: BoxDecoration(
-                          color: Color(0xFF121212),
+                          color: Color(0xFF407362),
                           shape: BoxShape.circle,
                         ),
-                        selectedTextStyle: TextStyle(color: Colors.white),
+                        selectedTextStyle: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'AppleSDGothicNeo-Medium', // <-- 폰트 적용
+                        ),
                       ),
                     ),
                 ],
