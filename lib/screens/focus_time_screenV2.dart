@@ -334,7 +334,7 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Color(0xFF6BAB93),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.black12),
                 ),
@@ -366,7 +366,7 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
                     style: ElevatedButton.styleFrom(
                       shape: CircleBorder(),
                       padding: EdgeInsets.all(16),
-                      backgroundColor: Colors.white,
+                      backgroundColor: Color(0xFFF95C3B),
                     ),
                     onPressed:
                         _isLocked
@@ -423,7 +423,7 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Color(0xFF6BAB93),
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(color: Colors.black12),
                         ),
@@ -435,7 +435,7 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
                     ),
                   ),
                   Align(
-                    alignment: Alignment.bottomRight,
+                    alignment: Alignment.bottomCenter,
                     child: Padding(
                       padding: EdgeInsets.only(
                         bottom: 32,

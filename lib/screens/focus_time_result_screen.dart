@@ -83,7 +83,6 @@ class FocusResultScreen extends StatelessWidget {
                 end: endDt, // 끝 시간
                 unfocused: unfocused, // 집중하지 못한 구간 리스트
                 height: 45, // 전체 높이
-                trackHeight: 3, // 집중 바 높이
               ),
             ),
             SizedBox(height: 20),
