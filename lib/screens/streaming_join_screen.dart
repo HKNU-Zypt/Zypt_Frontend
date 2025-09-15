@@ -3,11 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:focused_study_time_tracker/components/statsCard.dart';
 import 'package:focused_study_time_tracker/layout/default_layout.dart';
 import 'package:focused_study_time_tracker/models/study_room.dart';
-import 'package:focused_study_time_tracker/screens/streaming_screen.dart';
 import 'package:focused_study_time_tracker/services/livekit.dart';
 import 'package:focused_study_time_tracker/services/user_service.dart';
 import 'package:focused_study_time_tracker/components/circle_icon_button.dart';
 import 'package:go_router/go_router.dart';
+import 'package:focused_study_time_tracker/components/form_dialog.dart';
 
 class StreamingJoinScreen extends StatefulWidget {
   const StreamingJoinScreen({super.key});
@@ -109,9 +109,35 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
   }
 
   Future<void> _createRoom() async {
-    final result = await showDialog<Map<String, String>>(
-      context: context,
-      builder: (context) => const _CreateRoomDialog(),
+    final result = await showFormDialog(
+      context,
+      title: '방 생성',
+      fields: [
+        FormDialogFieldConfig(
+          id: 'name',
+          hintText: '방 이름',
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return '방 이름을 입력해주세요';
+            }
+            return null;
+          },
+        ),
+        FormDialogFieldConfig(
+          id: 'max',
+          hintText: '최대 참가자',
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          validator: (value) {
+            final v = int.tryParse((value ?? '').trim());
+            if (v == null || v <= 0) {
+              return '최대 참가자를 숫자로 입력해주세요';
+            }
+            return null;
+          },
+        ),
+      ],
+      primaryButtonText: '생성하기',
     );
 
     if (result != null && mounted) {
@@ -127,16 +153,6 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
           maxParticipant: maxParticipant,
         );
         if (!mounted) return;
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder:
-        //         (context) => StreamingScreen(
-        //           roomName: roomName,
-        //           participantName: nickname,
-        //         ),
-        //   ),
-        // );
         context.push(
           '/streaming_room',
           extra: {'roomName': roomName, 'participantName': nickname},

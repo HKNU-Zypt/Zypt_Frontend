@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:focused_study_time_tracker/components/box_design.dart';
+import 'package:focused_study_time_tracker/models/user.dart';
 import 'package:focused_study_time_tracker/services/login.dart';
 import 'package:focused_study_time_tracker/services/user_service.dart';
 import 'package:focused_study_time_tracker/components/main_button.dart';
 import 'package:go_router/go_router.dart';
+import 'package:focused_study_time_tracker/components/form_dialog.dart';
 
 class MyPageScreen extends StatefulWidget {
   const MyPageScreen({super.key});
@@ -13,12 +15,18 @@ class MyPageScreen extends StatefulWidget {
 }
 
 class _MyPageScreenState extends State<MyPageScreen> {
-  String _nickname = "나는야똑똑이";
+  final loginService = LoginService();
+  final userService = UserService();
+  User? _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _user = userService.currentUser;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final loginService = LoginService();
-
     return Container(
       color: Colors.white,
       child: Padding(
@@ -53,7 +61,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _nickname,
+                                _user?.nickName ?? '오류가 발생했습니다.',
                                 style: TextStyle(
                                   fontSize: 15,
                                   fontFamily: 'SoyoMaple',
@@ -62,7 +70,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
                               ),
                               SizedBox(height: 5),
                               Text(
-                                "abcdabcd@naver.com",
+                                _user?.email ?? '오류가 발생했습니다.',
                                 style: TextStyle(
                                   fontSize: 10,
                                   color: Colors.grey,
@@ -84,9 +92,16 @@ class _MyPageScreenState extends State<MyPageScreen> {
                               );
                               if (newNickname != null &&
                                   newNickname.isNotEmpty) {
-                                setState(() {
-                                  _nickname = newNickname;
-                                });
+                                final updated = await userService
+                                    .updateNickname(newNickname);
+                                if (updated && mounted) {
+                                  setState(() {
+                                    _user = userService.currentUser;
+                                  });
+                                  print('zypt [MyPageScreen] 닉네임 업데이트 성공');
+                                } else {
+                                  print('zypt [MyPageScreen] 닉네임 업데이트 실패');
+                                }
                               }
                             },
                             icon: Icon(Icons.edit_outlined, size: 17),
@@ -166,59 +181,24 @@ class _MyPageScreenState extends State<MyPageScreen> {
 }
 
 Future<String?> showNicknameDialog(BuildContext context) async {
-  final TextEditingController controller = TextEditingController();
-
-  return await showDialog<String>(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-        title: Stack(
-          alignment: Alignment.center,
-          children: [
-            const Text('닉네임 변경', style: TextStyle(fontWeight: FontWeight.bold)),
-            Align(
-              alignment: Alignment.centerRight,
-              child: IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ),
-          ],
-        ),
-        content: TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            hintText: '새 닉네임을 입력하세요',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-        ),
-        actions: <Widget>[
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.grey[800],
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-              child: const Text('변경사항 저장'),
-              onPressed: () {
-                Navigator.of(context).pop(controller.text);
-              },
-            ),
-          ),
-        ],
-        actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-      );
-    },
+  final initial = UserService().currentUser?.nickName;
+  final result = await showFormDialog(
+    context,
+    title: '닉네임 변경',
+    fields: [
+      FormDialogFieldConfig(
+        id: 'nickname',
+        hintText: '닉네임',
+        initialValue: initial,
+        validator: (value) {
+          if (value == null || value.trim().isEmpty) {
+            return '닉네임을 입력하세요';
+          }
+          return null;
+        },
+      ),
+    ],
+    primaryButtonText: '변경사항 저장',
   );
+  return result?['nickname'];
 }
