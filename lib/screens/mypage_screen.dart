@@ -30,12 +30,16 @@ class _MyPageScreenState extends State<MyPageScreen> {
               children: [
                 Text(
                   '마이페이지',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'SoyoMaple',
+                  ),
                 ),
                 SizedBox(height: 30),
                 BoxDesign(
                   backgroundcolor: Colors.white,
-                  designcolor: Color(0xFFD9D9D9),
+                  designcolor: Color(0xFF6BAB93),
                   width: 320,
                   height: 100,
                   child: Row(
@@ -52,7 +56,8 @@ class _MyPageScreenState extends State<MyPageScreen> {
                                 _nickname,
                                 style: TextStyle(
                                   fontSize: 15,
-                                  fontWeight: FontWeight.w500,
+                                  fontFamily: 'SoyoMaple',
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                               SizedBox(height: 5),

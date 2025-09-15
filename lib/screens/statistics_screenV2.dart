@@ -48,13 +48,15 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
                     color:
                         _selectedIndex == 0 ? Colors.black : Colors.transparent,
                   ),
-                  backgroundColor: Colors.white,
+                  backgroundColor:
+                      _selectedIndex == 0 ? Color(0xFF6BAB93) : Colors.white,
                 ),
                 onPressed: () => setState(() => _selectedIndex = 0),
                 child: Text(
                   "전체 통계",
                   style: TextStyle(
-                    color: Colors.black, // 텍스트 색상 변경
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
                     fontFamily: 'SoyoMaple',
                   ),
                 ),
@@ -67,13 +69,15 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
                     color:
                         _selectedIndex == 1 ? Colors.black : Colors.transparent,
                   ),
-                  backgroundColor: Colors.white,
+                  backgroundColor:
+                      _selectedIndex == 1 ? Color(0xFF6BAB93) : Colors.white,
                 ),
                 onPressed: () => setState(() => _selectedIndex = 1),
                 child: Text(
                   "기록 리스트",
                   style: TextStyle(
                     color: Colors.black,
+                    fontWeight: FontWeight.bold,
                     fontFamily: 'SoyoMaple',
                   ),
                 ),
