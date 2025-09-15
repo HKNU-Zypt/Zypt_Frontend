@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:focused_study_time_tracker/layout/default_layout.dart';
 import 'package:focused_study_time_tracker/services/livekit.dart';
+import 'package:focused_study_time_tracker/theme/app_theme.dart';
 import 'package:livekit_client/livekit_client.dart' as lk;
 
 class StreamingScreen extends StatefulWidget {
@@ -78,7 +78,7 @@ class _StreamingScreenState extends State<StreamingScreen> {
         elevation: 0,
       ),
       child: Theme(
-        data: ThemeData.dark(),
+        data: AppTheme.dark(),
         child: Stack(
           children: [
             // 참가자 비디오 그리드

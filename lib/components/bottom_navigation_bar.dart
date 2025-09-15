@@ -54,7 +54,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
           offset: Offset(0, -2),
         ),
         borderColor: Colors.black,
-        borderWidth: 0,
+        borderWidth: 2,
         tabBuilder: (index, isActive) {
           final Color iconColor =
               isActive ? Colors.black : const Color(0xFF9CA3AF);
