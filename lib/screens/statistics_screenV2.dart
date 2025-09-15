@@ -23,6 +23,7 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        surfaceTintColor: Colors.white,
         title: Text(
           "통계",
           style: TextStyle(
@@ -49,15 +50,18 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
                         _selectedIndex == 0 ? Colors.black : Colors.transparent,
                   ),
                   backgroundColor:
-                      _selectedIndex == 0 ? Color(0xFF6BAB93) : Colors.white,
+                      _selectedIndex == 1 ? Colors.white : Color(0xff6BAD97),
                 ),
                 onPressed: () => setState(() => _selectedIndex = 0),
                 child: Text(
                   "전체 통계",
                   style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
+                    color: Colors.black, // 텍스트 색상 변경
                     fontFamily: 'SoyoMaple',
+                    fontWeight:
+                        _selectedIndex == 1
+                            ? FontWeight.normal
+                            : FontWeight.bold,
                   ),
                 ),
               ),
@@ -70,15 +74,18 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
                         _selectedIndex == 1 ? Colors.black : Colors.transparent,
                   ),
                   backgroundColor:
-                      _selectedIndex == 1 ? Color(0xFF6BAB93) : Colors.white,
+                      _selectedIndex == 1 ? Color(0xff6BAD97) : Colors.white,
                 ),
                 onPressed: () => setState(() => _selectedIndex = 1),
                 child: Text(
                   "기록 리스트",
                   style: TextStyle(
                     color: Colors.black,
-                    fontWeight: FontWeight.bold,
                     fontFamily: 'SoyoMaple',
+                    fontWeight:
+                        _selectedIndex == 1
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                   ),
                 ),
               ),

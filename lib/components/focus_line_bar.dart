@@ -30,14 +30,14 @@ class FocusTimelineBar extends StatelessWidget {
     required this.end,
     this.unfocused = const [],
     this.height = 88,
-    this.trackHeight = 6,
-    this.radius = 6,
-    this.padding = const EdgeInsets.fromLTRB(20, 18, 20, 22),
-    this.baseColor = const Color.fromARGB(255, 120, 135, 131), // 전체 라인
-    this.segmentColor = const Color.fromARGB(255, 243, 163, 163), // 집중X 구간
-    this.endpointColor = const Color.fromARGB(255, 59, 62, 60), // 양끝 점
-    this.markerFill = const Color.fromARGB(255, 243, 163, 163), // 집중X 구간 경계
-    this.markerBorder = const Color.fromARGB(255, 230, 189, 189),
+    this.trackHeight = 2,
+    this.radius = 5,
+    this.padding = const EdgeInsets.fromLTRB(5, 18, 5, 22),
+    this.baseColor = const Color(0xFF6BAB93), // 전체 라인
+    this.segmentColor = const Color(0xFFF95C3B), // 집중X 구간
+    this.endpointColor = const Color(0xFF6BAB93), // 양끝 점
+    this.markerFill = const Color(0xFFF95C3B), // 집중X 구간 경계
+    this.markerBorder = const Color(0xFFF95C3B),
 
     // 기본값: 집중X 구간 라벨 숨김
     this.showUnfocusedLabels = false,
@@ -62,9 +62,11 @@ class FocusTimelineBar extends StatelessWidget {
           markerFill: markerFill,
           markerBorder: markerBorder,
           showUnfocusedLabels: showUnfocusedLabels, // ← 전달
-          textStyle: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(fontSize: 12, color: Colors.black87),
+          textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontSize: 12,
+            color: Colors.black87,
+            fontFamily: 'AppleSDGothicNeo',
+          ),
         ),
       ),
     );

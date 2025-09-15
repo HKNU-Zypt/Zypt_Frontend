@@ -56,192 +56,310 @@ class _RecordListScreenState extends State<RecordListScreen> {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Column(
-        children: [
-          const SizedBox(height: 10),
-          OffsetOutlinedCard(
-            child: TableCalendar(
-              locale: 'en_US',
-              focusedDay: _focusedDay,
-              firstDay: DateTime.utc(2025, 1, 1),
-              lastDay: DateTime.utc(2035, 12, 31),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            OffsetOutlinedCard(
+              padding: EdgeInsets.fromLTRB(20, 0, 20, 10),
+              child: TableCalendar(
+                daysOfWeekHeight: 20,
+                rowHeight: 47,
+                locale: 'en_US',
+                focusedDay: _focusedDay,
+                firstDay: DateTime.utc(2025, 1, 1),
+                lastDay: DateTime.utc(2035, 12, 31),
 
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
-              },
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-              onPageChanged: (focusedDay) {
-                setState(() {
-                  _focusedDay = focusedDay;
-                });
-              },
+                onDaySelected: (selectedDay, focusedDay) {
+                  setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
+                  });
+                },
+                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                onPageChanged: (focusedDay) {
+                  setState(() {
+                    _focusedDay = focusedDay;
+                  });
+                },
 
-              headerStyle: HeaderStyle(
-                titleCentered: true,
-                titleTextFormatter:
-                    (date, locale) => DateFormat.yMMMM(locale).format(date),
-                titleTextStyle: const TextStyle(
-                  fontSize: 15.0,
-                  fontWeight: FontWeight.bold,
+                headerStyle: HeaderStyle(
+                  titleCentered: true,
+                  titleTextFormatter:
+                      (date, locale) => DateFormat.yMMMM(locale).format(date),
+                  titleTextStyle: const TextStyle(
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  formatButtonVisible: false,
+                  leftChevronIcon: Icon(
+                    Icons.arrow_left_outlined,
+                    color: Color(0xFFD9D9D9),
+                    size: 40,
+                  ),
+                  rightChevronIcon: Icon(
+                    Icons.arrow_right_outlined,
+                    color: Color(0xFFD9D9D9),
+                    size: 40,
+                  ),
                 ),
-                formatButtonVisible: false,
-                leftChevronIcon: Icon(
-                  Icons.arrow_left_outlined,
-                  color: Color(0xFFD9D9D9),
-                  size: 40,
+                calendarStyle: const CalendarStyle(
+                  todayDecoration: BoxDecoration(
+                    color: Color(0xffACC9BF),
+                    shape: BoxShape.circle,
+                  ),
+                  todayTextStyle: TextStyle(color: Colors.black),
+                  weekendDecoration: BoxDecoration(
+                    color: Color(0xffACC9BF),
+                    shape: BoxShape.circle,
+                  ),
+                  weekendTextStyle: TextStyle(color: Colors.black),
+                  // 선택된 날짜 스타일
+                  selectedDecoration: BoxDecoration(
+                    color: Color(0xFF407362),
+                    shape: BoxShape.circle,
+                  ),
+
+                  // 기본 날짜 스타일
+                  defaultDecoration: BoxDecoration(
+                    color: Color(0xffACC9BF),
+                    shape: BoxShape.circle,
+                  ),
+
+                  // 지난달/다음달 날짜
+                  outsideDecoration: BoxDecoration(
+                    color: Color(0xff798B85),
+                    shape: BoxShape.circle,
+                  ),
+                  outsideTextStyle: TextStyle(color: Colors.white),
+                  selectedTextStyle: TextStyle(color: Colors.black),
+                  // ↓↓↓ 추가
+                  cellMargin: EdgeInsets.zero, // 셀 사이 여백 최소
+                  cellPadding: EdgeInsets.zero, // 셀 내부 여백 최소
                 ),
-                rightChevronIcon: Icon(
-                  Icons.arrow_right_outlined,
-                  color: Color(0xFFD9D9D9),
-                  size: 40,
-                ),
-              ),
-              calendarStyle: const CalendarStyle(
-                todayDecoration: BoxDecoration(
-                  color: Colors.transparent,
-                  shape: BoxShape.circle,
-                ),
-                todayTextStyle: TextStyle(color: Colors.black),
-                selectedDecoration: BoxDecoration(
-                  color: Color(0xFF121212),
-                  shape: BoxShape.circle,
-                ),
-                selectedTextStyle: TextStyle(color: Colors.white),
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-          OffsetOutlinedCard(
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      DateFormat('yyyy.M.d').format(_selectedDay!),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'AppleSDGothicNeo',
+            const SizedBox(height: 20),
+            OffsetOutlinedCard(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        DateFormat('yyyy.M.d').format(_selectedDay!),
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Color(0xffF95C3B),
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'AppleSDGothicNeo',
+                        ),
                       ),
-                    ),
-                    Icon(Icons.more_horiz_outlined, size: 15),
-                  ],
-                ),
-                SizedBox(height: 5),
-                FocusTimelineBar(
-                  start: startDt, // 시작 시간
-                  end: endDt, // 끝 시간
-                  unfocused: unfocused, // 집중하지 못한 구간 리스트
-                  height: 45, // 전체 높이
-                  trackHeight: 3, // 집중 바 높이
-                ),
-                SizedBox(height: 10),
-                Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                      Icon(Icons.more_horiz_outlined, size: 15),
+                    ],
+                  ),
+                  FocusTimelineBar(
+                    start: startDt, // 시작 시간
+                    end: endDt, // 끝 시간
+                    unfocused: unfocused, // 집중하지 못한 구간 리스트
+                    height: 44, // 전체 높이
+                  ),
+                  SizedBox(height: 10),
+                  Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                "공부 시간",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontFamily: 'AppleSDGothicNeo',
+                                ),
+                              ),
+                              SizedBox(width: 7),
+                              Text(
+                                "9:30 - 22:30 (2시간)",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'AppleSDGothicNeo',
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(width: 18),
+                          Row(
+                            children: [
+                              Text(
+                                "최대 집중 시간",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontFamily: 'AppleSDGothicNeo',
+                                ),
+                              ),
+                              SizedBox(width: 5),
+                              Text(
+                                "00분",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'AppleSDGothicNeo',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text("집중 시간", style: TextStyle(fontSize: 10)),
+                              SizedBox(width: 5),
+                              Text(
+                                "00시간 00분",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'AppleSDGothicNeo',
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(width: 50),
+                          Row(
+                            children: [
+                              Text(
+                                " 평균 집중 비율",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontFamily: 'AppleSDGothicNeo',
+                                ),
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                "00%",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'AppleSDGothicNeo',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            OffsetOutlinedCard(
+              padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 60),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Text("공부 시간", style: TextStyle(fontSize: 10)),
-                            SizedBox(width: 5),
-                            Text(
-                              "9:30 - 22:30 (2시간)",
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
+                        // 왼쪽 라벨들 (세로)
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "최대 집중 시간 :",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontFamily: 'AppleSDGothicNeo',
+                                ),
                               ),
-                            ),
-                          ],
+                              SizedBox(height: 10),
+                              Text(
+                                "최소 집중 시간 :",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontFamily: 'AppleSDGothicNeo',
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              Text(
+                                "하루 평균 집중 시간 :",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontFamily: 'AppleSDGothicNeo',
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        SizedBox(width: 20),
-                        Row(
+                        // 오른쪽 값들 (세로)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("최대 집중 시간", style: TextStyle(fontSize: 10)),
-                            SizedBox(width: 5),
                             Text(
-                              "00분",
+                              "14시",
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: 15,
                                 fontWeight: FontWeight.w600,
+                                fontFamily: 'AppleSDGothicNeo',
                               ),
                             ),
+                            SizedBox(height: 10),
+                            Text(
+                              "09시",
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'AppleSDGothicNeo',
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            Text(
+                              "10시간 30분",
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                fontFamily: 'AppleSDGothicNeo',
+                              ),
+                            ),
+                            SizedBox(height: 10),
                           ],
                         ),
                       ],
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                  ),
+                  Divider(thickness: 1.2, color: Colors.black87, height: 32),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
                       children: [
-                        Row(
-                          children: [
-                            Text("집중 시간", style: TextStyle(fontSize: 10)),
-                            SizedBox(width: 5),
-                            Text(
-                              "00시간 00분",
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
+                        SizedBox(height: 5),
+                        Text(
+                          "ㅇㅇ님은 총 ㅇㅇㅇㅇ시간 집중했어요!",
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontFamily: 'AppleSDGothicNeo',
+                          ),
                         ),
-                        SizedBox(width: 55),
-                        Row(
-                          children: [
-                            Text("평균 집중 비율", style: TextStyle(fontSize: 10)),
-                            SizedBox(width: 10),
-                            Text(
-                              "00%",
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
+                        SizedBox(height: 5),
                       ],
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 20),
-          OffsetOutlinedCard(
-            padding: const EdgeInsets.fromLTRB(60, 16, 60, 16),
-            child: const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text("최대 집중 시간대 :"), Text(" 14시")],
-                ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text("최소 집중 시간대 :"), Text(" 09시")],
-                ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text("하루 평균 집중 시간 :"), Text(" 10시간")],
-                ),
-
-                SizedBox(height: 15),
-                Divider(thickness: 1.2, color: Colors.black87, height: 32),
-                SizedBox(height: 15),
-                Text("ㅇㅇ님은 총 ㅇㅇㅇㅇ시간 집중했어요!"),
-              ],
-            ),
-          ),
-          SizedBox(height: 40),
-        ],
+            SizedBox(height: 40),
+          ],
+        ),
       ),
     );
   }
