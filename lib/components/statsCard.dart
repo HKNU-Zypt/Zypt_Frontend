@@ -53,6 +53,7 @@ class OffsetOutlinedCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     borderRadius: br,
                     border: Border.all(color: outlineColor, width: borderWidth),
+                    color: Color(0xff6BAB93),
                   ),
                 ),
               ),

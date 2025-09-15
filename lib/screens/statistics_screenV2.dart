@@ -23,6 +23,7 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        surfaceTintColor: Colors.white,
         title: Text(
           "통계",
           style: TextStyle(
@@ -48,7 +49,8 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
                     color:
                         _selectedIndex == 0 ? Colors.black : Colors.transparent,
                   ),
-                  backgroundColor: Colors.white,
+                  backgroundColor:
+                      _selectedIndex == 1 ? Colors.white : Color(0xff6BAD97),
                 ),
                 onPressed: () => setState(() => _selectedIndex = 0),
                 child: Text(
@@ -56,6 +58,10 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
                   style: TextStyle(
                     color: Colors.black, // 텍스트 색상 변경
                     fontFamily: 'SoyoMaple',
+                    fontWeight:
+                        _selectedIndex == 1
+                            ? FontWeight.normal
+                            : FontWeight.bold,
                   ),
                 ),
               ),
@@ -67,7 +73,8 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
                     color:
                         _selectedIndex == 1 ? Colors.black : Colors.transparent,
                   ),
-                  backgroundColor: Colors.white,
+                  backgroundColor:
+                      _selectedIndex == 1 ? Color(0xff6BAD97) : Colors.white,
                 ),
                 onPressed: () => setState(() => _selectedIndex = 1),
                 child: Text(
@@ -75,6 +82,10 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
                   style: TextStyle(
                     color: Colors.black,
                     fontFamily: 'SoyoMaple',
+                    fontWeight:
+                        _selectedIndex == 1
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                   ),
                 ),
               ),
