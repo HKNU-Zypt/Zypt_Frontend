@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:focused_study_time_tracker/components/statsCard.dart';
 import 'package:focused_study_time_tracker/layout/default_layout.dart';
 import 'package:focused_study_time_tracker/models/study_room.dart';
-import 'package:focused_study_time_tracker/screens/streaming_screen.dart';
 import 'package:focused_study_time_tracker/services/livekit.dart';
 import 'package:focused_study_time_tracker/services/user_service.dart';
 import 'package:focused_study_time_tracker/components/circle_icon_button.dart';
@@ -108,48 +107,6 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
     });
   }
 
-  Future<void> _createRoom() async {
-    final result = await showDialog<Map<String, String>>(
-      context: context,
-      builder: (context) => const _CreateRoomDialog(),
-    );
-
-    if (result != null && mounted) {
-      final roomName = result['name']!;
-      final maxStr = result['max'];
-      final int maxParticipant = int.tryParse(maxStr ?? '') ?? 10;
-      final nickname = _nickname ?? await _userService.getNickname() ?? '나';
-      try {
-        // 방만 생성하고 연결은 StreamingScreen에서 수행
-        await _liveKitService.initialize();
-        await _liveKitService.createRoomOnServer(
-          roomName,
-          maxParticipant: maxParticipant,
-        );
-        if (!mounted) return;
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder:
-        //         (context) => StreamingScreen(
-        //           roomName: roomName,
-        //           participantName: nickname,
-        //         ),
-        //   ),
-        // );
-        context.push(
-          '/streaming_room',
-          extra: {'roomName': roomName, 'participantName': nickname},
-        );
-      } catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('방 생성/입장 실패: $e')));
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
@@ -168,13 +125,6 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
               iconColor: Colors.white,
             ),
             const SizedBox(width: 8),
-            CircleIconButton(
-              icon: Icons.add,
-              onTap: _createRoom,
-              backgroundColor: Colors.white,
-              iconColor: Colors.black,
-              borderColor: Colors.grey,
-            ),
           ],
         ),
         actions: [
@@ -266,11 +216,16 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
                                   //         ),
                                   //   ),
                                   // );
+                                  // 입장 토큰 발급 후 라우팅
+                                  final token = await _liveKitService
+                                      .joinRoomAndGetToken(room.name);
+                                  if (!mounted) return;
                                   context.push(
                                     '/streaming_room',
                                     extra: {
                                       'roomName': room.name,
                                       'participantName': nickname,
+                                      'token': token,
                                     },
                                   );
                                 } catch (e) {
@@ -434,167 +389,6 @@ class _RoomCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _CreateRoomDialog extends StatefulWidget {
-  const _CreateRoomDialog();
-
-  @override
-  State<_CreateRoomDialog> createState() => _CreateRoomDialogState();
-}
-
-class _CreateRoomDialogState extends State<_CreateRoomDialog> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _maxController = TextEditingController();
-
-  void _submit() {
-    if (_formKey.currentState!.validate()) {
-      Navigator.pop(context, {
-        'name': _nameController.text.trim(),
-        'max': _maxController.text.trim(),
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _maxController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-        side: const BorderSide(color: Colors.black87, width: 1.2),
-      ),
-      titlePadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-      contentPadding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
-      title: const Text(
-        '방 생성',
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'AppleSDGothicNeo',
-        ),
-      ),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _PillTextField(
-              controller: _nameController,
-              hintText: '방 이름',
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return '방 이름을 입력해주세요';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 10),
-            _PillTextField(
-              controller: _maxController,
-              hintText: '최대 참가자',
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              onSubmitted: (_) => _submit(),
-              validator: (value) {
-                final v = int.tryParse((value ?? '').trim());
-                if (v == null || v <= 0) {
-                  return '최대 참가자를 숫자로 입력해주세요';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 20),
-            OutlinedButton(
-              onPressed: _submit,
-              style: OutlinedButton.styleFrom(
-                minimumSize: const Size.fromHeight(56),
-                shape: const StadiumBorder(),
-                side: const BorderSide(color: Colors.black87, width: 1.2),
-                backgroundColor: const Color(0xFFEFEFEF),
-                foregroundColor: Colors.black,
-                textStyle: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              child: const Text('생성하기'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PillTextField extends StatelessWidget {
-  const _PillTextField({
-    required this.controller,
-    required this.hintText,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-    this.onSubmitted,
-  });
-
-  final TextEditingController controller;
-  final String hintText;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-  final void Function(String)? onSubmitted;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      onFieldSubmitted: onSubmitted,
-      textAlign: TextAlign.center,
-      style: const TextStyle(
-        color: Colors.white,
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
-      ),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-        ),
-        filled: true,
-        fillColor: Colors.grey,
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 10,
-          horizontal: 10,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.black, width: 2),
-        ),
-      ),
-      validator: validator,
     );
   }
 }

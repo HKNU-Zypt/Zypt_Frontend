@@ -9,8 +9,6 @@ import 'package:focused_study_time_tracker/screens/login_screen.dart';
 import 'package:focused_study_time_tracker/screens/mypage_screen.dart';
 import 'package:focused_study_time_tracker/screens/nick_name_screen.dart';
 import 'package:focused_study_time_tracker/screens/open_source_info_screen.dart';
-import 'package:focused_study_time_tracker/screens/record_list_screen.dart';
-import 'package:focused_study_time_tracker/screens/statistics_screen.dart';
 import 'package:focused_study_time_tracker/screens/statistics_screenV2.dart';
 import 'package:focused_study_time_tracker/screens/streaming_join_screen.dart';
 import 'package:focused_study_time_tracker/screens/streaming_screen.dart';
@@ -83,12 +81,8 @@ final router = GoRouter(
       path: '/streaming_room',
       builder: (context, state) {
         final roomName = (state.extra as Map?)?['roomName'] as String? ?? '';
-        final participantName =
-            (state.extra as Map?)?['participantName'] as String? ?? '';
-        return StreamingScreen(
-          roomName: roomName,
-          participantName: participantName,
-        );
+        final token = (state.extra as Map?)?['token'] as String? ?? '';
+        return StreamingScreen(roomName: roomName, token: token);
       },
     ),
   ],

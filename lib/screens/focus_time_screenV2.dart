@@ -193,6 +193,21 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
     }
   }
 
+  Color _getFocusStatusColor(String status) {
+    switch (status) {
+      case '졸음':
+        return Colors.orange;
+      case '집중 안함':
+        return const Color.fromARGB(255, 61, 110, 92);
+      case '얼굴 미감지':
+        return Colors.blue;
+      case '집중':
+        return Colors.white;
+      default:
+        return const Color.fromARGB(255, 93, 135, 191);
+    }
+  }
+
   String _formatTime(DateTime dt) => DateFormat('HH:mm:ss').format(dt);
   String _formatDate(DateTime dt) => DateFormat('yyyy-MM-dd').format(dt);
 
@@ -312,21 +327,25 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    final cameraPreview =
+        _isCameraInitialized && _cameraController != null
+            ? FittedBox(
+              fit: BoxFit.cover,
+              alignment: AlignmentGeometry.center,
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: CameraPreview(_cameraController!),
+              ),
+            )
+            : Center(child: Text('전면 카메라 화면'));
 
     return DefaultLayout(
       child: Stack(
         children: [
+          Container(color: Colors.black),
           // 카메라 전체 화면
-          Positioned.fill(
-            child:
-                _isCameraInitialized && _cameraController != null
-                    ? Transform(
-                      alignment: Alignment.center,
-                      transform: Matrix4.rotationY(math.pi),
-                      child: CameraPreview(_cameraController!),
-                    )
-                    : Container(child: Center(child: Text('전면 카메라 화면'))),
-          ),
+          // 그냥 child로만 사용
+          cameraPreview,
           // 상단 시간 표시
           Positioned(
             top: 20,
@@ -348,11 +367,18 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
             ),
           ),
           Positioned(
-            bottom: 100,
-
-            child: Text(
-              '상태: $_focusStatus',
-              style: const TextStyle(fontSize: 20),
+            bottom: 110,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Text(
+                '상태: $_focusStatus',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontFamily: 'SoyoMaple',
+                  color: _getFocusStatusColor(_focusStatus),
+                ),
+              ),
             ),
           ),
           // 하단 버튼들
@@ -374,6 +400,30 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
                         _isLocked
                             ? null
                             : () {
+                              if (_elapsed.inSeconds < 60) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('최소한 1분 이상 진행해주세요.'),
+                                    duration: Duration(seconds: 2),
+                                    backgroundColor: Colors.black.withOpacity(
+                                      0.7,
+                                    ), // 투명도 70%
+                                    behavior:
+                                        SnackBarBehavior
+                                            .floating, // (선택) 위로 띄우기
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    margin: EdgeInsets.symmetric(
+                                      horizontal: 40,
+                                      vertical:
+                                          MediaQuery.of(context).size.height *
+                                          0.4,
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
                               // 1. _finalizeAndPost 함수를 호출하여 dto 데이터를 받습니다.
                               final sessionData = _finalizeAndPost();
 

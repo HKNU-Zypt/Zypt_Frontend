@@ -36,7 +36,14 @@ class BarChartWidget extends StatelessWidget {
 
     return SfCartesianChart(
       plotAreaBorderWidth: 0, // 사각형 테두리 제거
-
+      title: ChartTitle(
+        text: '누적 집중 시간 / 시간대',
+        textStyle: TextStyle(
+          fontFamily: 'SoyoMaple',
+          fontSize: 8,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       primaryXAxis: const CategoryAxis(
         title: AxisTitle(text: '시간대', textStyle: TextStyle(fontSize: 10)),
         majorGridLines: MajorGridLines(width: 0), // X축 주 격자 제거

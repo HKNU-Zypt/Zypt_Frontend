@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:focused_study_time_tracker/route/router.dart';
 import 'package:focused_study_time_tracker/services/user_service.dart';
+import 'package:focused_study_time_tracker/theme/app_theme.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 void main() async {
@@ -29,11 +30,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       title: 'Zypt',
       routerConfig: router,
-      theme: ThemeData(
-        snackBarTheme: const SnackBarThemeData(
-          behavior: SnackBarBehavior.floating,
-        ),
-      ),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
     );
   }
 }

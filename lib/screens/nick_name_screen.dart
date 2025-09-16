@@ -111,6 +111,7 @@ class _NickNameScreenState extends State<NickNameScreen> {
     _isNicknameSet(context);
 
     return DefaultLayout(
+      backgroundColor: Color(0xFFE6E5D3),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
         child: Form(

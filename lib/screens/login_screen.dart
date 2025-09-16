@@ -15,6 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
+      backgroundColor: Color(0xFFE6E5D3),
       child: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),

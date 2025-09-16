@@ -1,8 +1,5 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:livekit_client/livekit_client.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:focused_study_time_tracker/const.dart';
 import 'package:focused_study_time_tracker/services/login.dart';
@@ -12,34 +9,9 @@ class LiveKitService {
   factory LiveKitService() => _instance;
   LiveKitService._internal();
 
-  Room? _room;
-  String? _token;
-  String? _wsUrl;
+  String? token;
+  String wsUrl = dotenv.env['LIVEKIT_URL'] ?? '';
   final LoginService _loginService = LoginService();
-  VoidCallback? _roomListener;
-  bool _useFrontCamera = true;
-  bool _isDisconnecting = false;
-
-  // 참가자/미디어/연결 상태 브로드캐스트
-  final ValueNotifier<ParticipantsState> participantsStateNotifier =
-      ValueNotifier<ParticipantsState>(
-        const ParticipantsState(localParticipant: null, remoteParticipants: []),
-      );
-  final ValueNotifier<bool> cameraEnabledNotifier = ValueNotifier<bool>(false);
-  final ValueNotifier<bool> microphoneEnabledNotifier = ValueNotifier<bool>(
-    false,
-  );
-  final ValueNotifier<ConnectionState> connectionStateNotifier =
-      ValueNotifier<ConnectionState>(ConnectionState.disconnected);
-
-  bool get isRoomInitialized => _room != null;
-
-  Future<void> initialize() async {
-    _wsUrl = dotenv.env['LIVEKIT_URL'];
-    if (_wsUrl == null) {
-      throw Exception('LIVEKIT_URL is not set in .env file');
-    }
-  }
 
   Future<Map<String, String>> _authHeaders() async {
     final accessToken = await _loginService.getAccessToken();
@@ -65,7 +37,7 @@ class LiveKitService {
     return response;
   }
 
-  Future<String> _createRoomAndGetToken(
+  Future<String> createRoomAndGetToken(
     String roomName, {
     int maxParticipant = 10,
   }) async {
@@ -91,7 +63,7 @@ class LiveKitService {
     throw Exception('방 생성/토큰 발급 실패: ${response.statusCode} ${response.body}');
   }
 
-  Future<String> _joinRoomAndGetToken(String roomName) async {
+  Future<String> joinRoomAndGetToken(String roomName) async {
     final headers = await _authHeaders();
     final uri = Uri.parse('http://$baseUrl/api/rooms/$roomName');
     final response = await _authorizedRequest(
@@ -106,270 +78,6 @@ class LiveKitService {
       return livekitAccessToken;
     }
     throw Exception('룸 참여/토큰 발급 실패: ${response.statusCode} ${response.body}');
-  }
-
-  Future<void> connect(String roomName, String participantName) async {
-    try {
-      // 기존 세션이 남아있다면 정리
-      if (_room != null) {
-        debugPrint(
-          'zypt [LiveKitService] connect - existing room found, disconnecting first',
-        );
-        await disconnect();
-      }
-      // 백엔드에서 닉네임/식별자는 액세스 토큰으로 파생되므로 participantName은 서버에 전달하지 않습니다.
-      _token = await _joinRoomAndGetToken(roomName);
-      _room = Room();
-
-      if (_wsUrl == null || _token == null) {
-        throw Exception('LiveKit URL or token is not initialized');
-      }
-
-      await _room!.connect(_wsUrl!, _token!);
-      _attachRoomListener();
-      _emitState();
-    } catch (e) {
-      _room = null;
-      throw Exception('LiveKit 방 연결 실패: $e');
-    }
-  }
-
-  Future<void> createAndConnect(
-    String roomName, {
-    int maxParticipant = 10,
-  }) async {
-    try {
-      // 기존 세션이 남아있다면 정리
-      if (_room != null) {
-        debugPrint(
-          'zypt [LiveKitService] createAndConnect - existing room found, disconnecting first',
-        );
-        await disconnect();
-      }
-      _token = await _createRoomAndGetToken(
-        roomName,
-        maxParticipant: maxParticipant,
-      );
-      _room = Room();
-
-      if (_wsUrl == null || _token == null) {
-        throw Exception('LiveKit URL or token is not initialized');
-      }
-
-      await _room!.connect(_wsUrl!, _token!);
-      _attachRoomListener();
-      _emitState();
-    } catch (e) {
-      _room = null;
-      throw Exception('LiveKit 방 생성/연결 실패: $e');
-    }
-  }
-
-  // 방만 생성(백엔드에 방 생성 요청)하고 연결은 하지 않습니다.
-  Future<void> createRoomOnServer(
-    String roomName, {
-    int maxParticipant = 10,
-  }) async {
-    try {
-      await _createRoomAndGetToken(roomName, maxParticipant: maxParticipant);
-    } catch (e) {
-      throw Exception('LiveKit 방 생성 실패: $e');
-    }
-  }
-
-  Future<void> disconnect() async {
-    if (_isDisconnecting) {
-      return;
-    }
-    _isDisconnecting = true;
-    try {
-      if (_room != null) {
-        try {
-          // 빠른 해제를 위해 우선 Room.disconnect() 호출
-        } catch (e) {
-          debugPrint('zypt [LiveKitService] unpublishAll error: $e');
-        }
-        try {
-          if (_roomListener != null) {
-            _room!.removeListener(_roomListener!);
-            _roomListener = null;
-          }
-        } catch (e) {
-          debugPrint('zypt [LiveKitService] removeListener error: $e');
-        }
-        try {
-          await _room!.disconnect();
-        } catch (e) {
-          debugPrint('zypt [LiveKitService] room.disconnect error: $e');
-        }
-        _room = null;
-      }
-    } finally {
-      // 상태 초기화
-      participantsStateNotifier.value = const ParticipantsState(
-        localParticipant: null,
-        remoteParticipants: [],
-      );
-      cameraEnabledNotifier.value = false;
-      microphoneEnabledNotifier.value = false;
-      connectionStateNotifier.value = ConnectionState.disconnected;
-      _isDisconnecting = false;
-    }
-  }
-
-  Room get room {
-    if (_room == null) {
-      throw Exception('Room is not initialized. Call connect() first.');
-    }
-    return _room!;
-  }
-
-  LocalParticipant? get localParticipant => _room?.localParticipant;
-
-  List<RemoteParticipant> get remoteParticipants =>
-      _room?.remoteParticipants.values.toList() ?? [];
-
-  Future<void> publishVideo() async {
-    if (_room == null) {
-      throw Exception('Room is not initialized. Call connect() first.');
-    }
-
-    try {
-      // LiveKit 권장 방식: 카메라 퍼블리시/언퍼블리시 토글
-      await _room!.localParticipant!.setCameraEnabled(
-        true,
-        cameraCaptureOptions: CameraCaptureOptions(
-          cameraPosition:
-              _useFrontCamera ? CameraPosition.front : CameraPosition.back,
-        ),
-      );
-      cameraEnabledNotifier.value = true;
-    } catch (e) {
-      throw Exception('Failed to publish video: $e');
-    }
-  }
-
-  Future<void> publishAudio() async {
-    if (_room == null) {
-      throw Exception('Room is not initialized. Call connect() first.');
-    }
-
-    try {
-      // LiveKit 권장 방식: 마이크 퍼블리시/언퍼블리시 토글
-      await _room!.localParticipant!.setMicrophoneEnabled(true);
-      microphoneEnabledNotifier.value = true;
-    } catch (e) {
-      throw Exception('Failed to publish audio: $e');
-    }
-  }
-
-  Future<void> unpublishVideo() async {
-    if (_room?.localParticipant != null) {
-      await _room!.localParticipant!.setCameraEnabled(false);
-      cameraEnabledNotifier.value = false;
-    }
-  }
-
-  Future<void> unpublishAudio() async {
-    if (_room?.localParticipant != null) {
-      await _room!.localParticipant!.setMicrophoneEnabled(false);
-      microphoneEnabledNotifier.value = false;
-    }
-  }
-
-  Future<void> unpublishAll() async {
-    await unpublishVideo();
-    await unpublishAudio();
-  }
-
-  // 권한 보장: 카메라/마이크 런타임 권한 요청
-  Future<void> ensurePermissions() async {
-    final statuses = await [Permission.camera, Permission.microphone].request();
-
-    final cameraGranted =
-        statuses[Permission.camera] == PermissionStatus.granted;
-    final micGranted =
-        statuses[Permission.microphone] == PermissionStatus.granted;
-
-    if (!cameraGranted) {
-      throw Exception('카메라 권한이 필요합니다. 설정에서 권한을 허용하세요.');
-    }
-    if (!micGranted) {
-      throw Exception('마이크 권한이 필요합니다. 설정에서 권한을 허용하세요.');
-    }
-  }
-
-  // --- 편의 API ---
-  bool get isCameraEnabled => cameraEnabledNotifier.value;
-  bool get isMicrophoneEnabled => microphoneEnabledNotifier.value;
-
-  Future<void> setCameraEnabled(bool enabled) async {
-    if (_room?.localParticipant == null) {
-      throw Exception('Room is not initialized. Call connect() first.');
-    }
-    await _room!.localParticipant!.setCameraEnabled(
-      enabled,
-      cameraCaptureOptions:
-          enabled
-              ? CameraCaptureOptions(
-                cameraPosition:
-                    _useFrontCamera
-                        ? CameraPosition.front
-                        : CameraPosition.back,
-              )
-              : null,
-    );
-    cameraEnabledNotifier.value = enabled;
-  }
-
-  Future<void> setMicrophoneEnabled(bool enabled) async {
-    if (_room?.localParticipant == null) {
-      throw Exception('Room is not initialized. Call connect() first.');
-    }
-    await _room!.localParticipant!.setMicrophoneEnabled(enabled);
-    microphoneEnabledNotifier.value = enabled;
-  }
-
-  Future<void> toggleCamera() async {
-    await setCameraEnabled(!cameraEnabledNotifier.value);
-  }
-
-  Future<void> toggleMicrophone() async {
-    await setMicrophoneEnabled(!microphoneEnabledNotifier.value);
-  }
-
-  Future<void> flipCamera() async {
-    final local = _room?.localParticipant;
-    if (local == null) {
-      throw Exception('Room is not initialized. Call connect() first.');
-    }
-    _useFrontCamera = !_useFrontCamera;
-    if (cameraEnabledNotifier.value) {
-      await setCameraEnabled(true);
-    }
-  }
-
-  void _attachRoomListener() {
-    if (_room == null) return;
-    _roomListener ??= _onRoomChanged;
-    _room!.addListener(_roomListener!);
-  }
-
-  void _onRoomChanged() {
-    _emitState();
-  }
-
-  void _emitState() {
-    final local = _room?.localParticipant;
-    final remotes = _room?.remoteParticipants.values.toList() ?? [];
-    participantsStateNotifier.value = ParticipantsState(
-      localParticipant: local,
-      remoteParticipants: remotes,
-    );
-    cameraEnabledNotifier.value = local?.hasVideo ?? false;
-    microphoneEnabledNotifier.value = local?.hasAudio ?? false;
-    connectionStateNotifier.value =
-        _room?.connectionState ?? ConnectionState.disconnected;
   }
 
   // ====== 추가: 룸/참가자 조회 및 삭제 ======
@@ -417,14 +125,4 @@ class LiveKitService {
       throw Exception('룸 삭제 실패: ${response.statusCode} ${response.body}');
     }
   }
-}
-
-class ParticipantsState {
-  final LocalParticipant? localParticipant;
-  final List<RemoteParticipant> remoteParticipants;
-
-  const ParticipantsState({
-    required this.localParticipant,
-    required this.remoteParticipants,
-  });
 }
