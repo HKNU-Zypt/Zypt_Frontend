@@ -89,12 +89,29 @@ class FocusTimeService {
   }
 
   /// DELETE /api/focus_times?year&month&day
-  Future<String> deleteFocusTimes({int? year, int? month, int? day}) async {
+  Future<String> deleteFocusTimesByDate({
+    int? year,
+    int? month,
+    int? day,
+  }) async {
     _validateDateQuery(year: year, month: month, day: day);
     final query = <String, dynamic>{};
     if (year != null) query['year'] = year;
     if (month != null) query['month'] = month;
     if (day != null) query['day'] = day;
+
+    final uri = _buildUri('/api/focus_times/date', query);
+    final response = await http.delete(uri, headers: await _authHeaders());
+    if (response.statusCode == 200) {
+      return response.body; // "집중 데이터 삭제 완료"
+    }
+    throw _toException(response);
+  }
+
+  /// DELETE /api/focus_times?year&month&day
+  Future<String> deleteFocusTimes(int id) async {
+    final query = <String, dynamic>{};
+    query['focusId'] = id;
 
     final uri = _buildUri('/api/focus_times', query);
     final response = await http.delete(uri, headers: await _authHeaders());

@@ -55,18 +55,12 @@ class _StatisticsAllScreenState extends State<StatisticsAllScreen> {
             ),
           ),
           const SizedBox(height: 10),
+
           Container(
-            margin: const EdgeInsets.symmetric(horizontal: 10),
-            decoration: BoxDecoration(
-              border: const Border(
-                bottom: BorderSide(
-                  color: Color.fromARGB(255, 150, 151, 150),
-                  width: 1,
-                ),
-              ),
-              borderRadius: BorderRadius.circular(0), // 양쪽 둥글게 안 할 경우 0
+            child: OffsetOutlinedCard(
+              padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
+              child: BarChartWidget(),
             ),
-            child: const BarChartWidget(),
           ),
           const SizedBox(height: 30),
           OffsetOutlinedCard(
