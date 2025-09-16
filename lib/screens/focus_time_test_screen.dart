@@ -93,7 +93,7 @@ class _FocusTimeTestScreenState extends State<FocusTimeTestScreen> {
       final month =
           _monthCtrl.text.isEmpty ? null : int.tryParse(_monthCtrl.text);
       final day = _dayCtrl.text.isEmpty ? null : int.tryParse(_dayCtrl.text);
-      final msg = await FocusTimeService().deleteFocusTimes(
+      final msg = await FocusTimeService().deleteFocusTimesByDate(
         year: year,
         month: month,
         day: day,

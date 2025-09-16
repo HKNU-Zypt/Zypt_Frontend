@@ -20,6 +20,7 @@ class FocusTimelineBar extends StatelessWidget {
   final Color endpointColor;
   final Color markerFill;
   final Color markerBorder;
+  final bool isResult;
 
   // NEW: 집중X 구간 라벨 표시 여부
   final bool showUnfocusedLabels;
@@ -28,19 +29,20 @@ class FocusTimelineBar extends StatelessWidget {
     super.key,
     required this.start,
     required this.end,
+
     this.unfocused = const [],
     this.height = 88,
     this.trackHeight = 2,
     this.radius = 5,
-    this.padding = const EdgeInsets.fromLTRB(5, 18, 5, 22),
+    this.padding = const EdgeInsets.fromLTRB(5, 15, 5, 14),
     this.baseColor = const Color(0xFF6BAB93), // 전체 라인
     this.segmentColor = const Color(0xFFF95C3B), // 집중X 구간
     this.endpointColor = const Color(0xFF6BAB93), // 양끝 점
     this.markerFill = const Color(0xFFF95C3B), // 집중X 구간 경계
     this.markerBorder = const Color(0xFFF95C3B),
-
     // 기본값: 집중X 구간 라벨 숨김
     this.showUnfocusedLabels = false,
+    this.isResult = false,
   });
 
   @override
@@ -67,6 +69,7 @@ class FocusTimelineBar extends StatelessWidget {
             color: Colors.black87,
             fontFamily: 'AppleSDGothicNeo',
           ),
+          isResult: isResult,
         ),
       ),
     );
@@ -81,6 +84,7 @@ class _FocusTimelinePainter extends CustomPainter {
   final Color baseColor, segmentColor, endpointColor, markerFill, markerBorder;
   final TextStyle? textStyle;
   final bool showUnfocusedLabels; // NEW
+  final bool isResult; // 결과 화면 여부 (라벨 위치 조정용)
 
   _FocusTimelinePainter({
     required this.start,
@@ -96,6 +100,7 @@ class _FocusTimelinePainter extends CustomPainter {
     required this.markerBorder,
     required this.textStyle,
     required this.showUnfocusedLabels, // NEW
+    this.isResult = false,
   });
 
   @override
@@ -175,7 +180,11 @@ class _FocusTimelinePainter extends CustomPainter {
         canvas.drawCircle(Offset(m.x, y), smallR, border);
       }
       if (m.showLabel) {
-        _drawLabel(canvas, Offset(m.x, labelY + 15), _fmt(m.time));
+        _drawLabel(
+          canvas,
+          Offset(m.x, labelY + (isResult ? 0 : 20)),
+          _fmt(m.time),
+        );
       }
     }
   }
