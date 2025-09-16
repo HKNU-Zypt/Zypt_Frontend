@@ -240,7 +240,7 @@ Future<Map<String, DateTime>?> showCalendarDialog(
               borderRadius: BorderRadius.circular(20.0),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(15.0),
+              padding: const EdgeInsets.all(5.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -305,7 +305,6 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
                             icon: Icon(
@@ -331,16 +330,20 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                                 focusedDay = localStartDate;
                               });
                             },
-                            child: Text(
-                              DateFormat('MMM d, yyyy').format(localStartDate),
-                              style: TextStyle(
-                                color:
-                                    isSelectingStartDate
-                                        ? Color(0xFF121212)
-                                        : Color(0xFF757575),
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'AppleSDGothicNeo-Bold',
-                                fontSize: 16,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                DateFormat(
+                                  'MMM d, yyyy',
+                                ).format(localStartDate),
+                                style: TextStyle(
+                                  color:
+                                      isSelectingStartDate
+                                          ? Color(0xFF121212)
+                                          : Color(0xFF757575),
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: 'AppleSDGothicNeo-Bold',
+                                ),
                               ),
                             ),
                           ),
@@ -351,16 +354,18 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                                 focusedDay = localEndDate;
                               });
                             },
-                            child: Text(
-                              DateFormat('MMM d, yyyy').format(localEndDate),
-                              style: TextStyle(
-                                color:
-                                    !isSelectingStartDate
-                                        ? Color(0xFF121212)
-                                        : Color(0xFF757575),
-                                fontFamily: 'AppleSDGothicNeo-Bold',
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                DateFormat('MMM d, yyyy').format(localEndDate),
+                                style: TextStyle(
+                                  color:
+                                      !isSelectingStartDate
+                                          ? Color(0xFF121212)
+                                          : Color(0xFF757575),
+                                  fontFamily: 'AppleSDGothicNeo-Bold',
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
