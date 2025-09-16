@@ -171,3 +171,31 @@ class FocusTimeService {
     }
   }
 }
+
+extension FocusTimeStatisticsApi on FocusTimeService {
+  /// GET /api/focus_times/statistics?from=yyyy-MM-dd&to=yyyy-MM-dd
+  Future<FocusTimeStatisticsResponseDto> getStatistics({
+    required DateTime from,
+    required DateTime to,
+  }) async {
+    final query = <String, dynamic>{
+      'from': _formatDate(from),
+      'to': _formatDate(to),
+    };
+    final uri = _buildUri('/api/focus_times/statistics', query);
+    final response = await http.get(uri, headers: await _authHeaders());
+    if (response.statusCode == 200) {
+      final map = jsonDecode(response.body) as Map<String, dynamic>;
+      return FocusTimeStatisticsResponseDto.fromJson(map);
+    }
+    throw _toException(response);
+  }
+
+  String _formatDate(DateTime d) {
+    // yyyy-MM-dd
+    final y = d.year.toString().padLeft(4, '0');
+    final m = d.month.toString().padLeft(2, '0');
+    final day = d.day.toString().padLeft(2, '0');
+    return '$y-$m-$day';
+  }
+}

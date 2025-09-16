@@ -2,37 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class BarChartWidget extends StatelessWidget {
-  const BarChartWidget({super.key});
+  final List<num> values; // 길이 24 가정
+  const BarChartWidget({super.key, required this.values});
 
   @override
   Widget build(BuildContext context) {
-    // 시간 대에 따른 값
-    final List<StudyData> chartData = [
-      StudyData('0', 87),
-      StudyData('1', 65),
-      StudyData('2', 38),
-      StudyData('3', 18),
-      StudyData('4', 7),
-      StudyData('5', 8),
-      StudyData('6', 5),
-      StudyData('7', 20),
-      StudyData('8', 13),
-      StudyData('9', 43),
-      StudyData('10', 56),
-      StudyData('11', 55),
-      StudyData('12', 22),
-      StudyData('13', 41),
-      StudyData('14', 60),
-      StudyData('15', 83),
-      StudyData('16', 89),
-      StudyData('17', 49),
-      StudyData('18', 23),
-      StudyData('19', 20),
-      StudyData('20', 71),
-      StudyData('21', 82),
-      StudyData('22', 100),
-      StudyData('23', 115),
-    ];
+    final List<StudyData> chartData = List.generate(24, (i) {
+      final v = i < values.length ? values[i].toDouble() : 0.0;
+      return StudyData('$i', v);
+    });
 
     return SfCartesianChart(
       plotAreaBorderWidth: 0, // 사각형 테두리 제거

@@ -170,3 +170,25 @@ class FocusTimeApiException implements Exception {
   String toString() =>
       'FocusTimeApiException(statusCode: $statusCode, error: $error)';
 }
+
+/// 통계 응답 DTO (/api/focus_times/statistics)
+class FocusTimeStatisticsResponseDto {
+  final String startDate; // yyyy-MM-dd
+  final String endDate; // yyyy-MM-dd
+  final List<int> focusScoresPerHours; // 길이 24, 분 단위 누적치
+
+  FocusTimeStatisticsResponseDto({
+    required this.startDate,
+    required this.endDate,
+    required this.focusScoresPerHours,
+  });
+
+  factory FocusTimeStatisticsResponseDto.fromJson(Map<String, dynamic> json) {
+    final List<dynamic> arr = json['focusScoresPerHours'] as List<dynamic>;
+    return FocusTimeStatisticsResponseDto(
+      startDate: json['startDate'] as String,
+      endDate: json['endDate'] as String,
+      focusScoresPerHours: arr.map((e) => (e as num).toInt()).toList(),
+    );
+  }
+}

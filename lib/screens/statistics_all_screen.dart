@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:focused_study_time_tracker/components/box_design.dart';
+// import 'package:focused_study_time_tracker/components/box_design.dart';
 import 'package:focused_study_time_tracker/components/statsCard.dart';
 import 'package:focused_study_time_tracker/widgets/bar_chart_widget.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:focused_study_time_tracker/services/focus_time_service.dart';
+import 'package:focused_study_time_tracker/models/focus_time.dart';
+import 'package:focused_study_time_tracker/services/user_service.dart';
 
 class StatisticsAllScreen extends StatefulWidget {
   const StatisticsAllScreen({super.key});
@@ -16,12 +19,124 @@ class _StatisticsAllScreenState extends State<StatisticsAllScreen> {
   DateTime startDate = DateTime.now().subtract(const Duration(days: 7));
   DateTime endDate = DateTime.now();
 
+  FocusTimeStatisticsResponseDto? _stats;
+  bool _isLoading = false;
+  String? _errorMessage;
+  String? _nickname;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInitial();
+  }
+
+  Future<void> _loadInitial() async {
+    await Future.wait([_loadStats(), _loadNickname()]);
+  }
+
+  Future<void> _loadNickname() async {
+    try {
+      final nick = await UserService().getNickname();
+      if (!mounted) return;
+      setState(() {
+        _nickname = nick ?? '회원';
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _nickname = '회원';
+      });
+    }
+  }
+
+  Future<void> _loadStats() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final res = await FocusTimeService().getStatistics(
+        from: startDate,
+        to: endDate,
+      );
+      if (!mounted) return;
+      setState(() {
+        _stats = res;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _errorMessage = '통계 불러오기에 실패했습니다';
+      });
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  int _daysInclusive(DateTime s, DateTime e) {
+    final sd = DateTime(s.year, s.month, s.day);
+    final ed = DateTime(e.year, e.month, e.day);
+    return ed.difference(sd).inDays + 1;
+  }
+
+  int _sumMinutes(List<int> arr) => arr.fold(0, (a, b) => a + b);
+
+  int _maxHourIndex(List<int> arr) {
+    if (arr.isEmpty) return 0;
+    int maxV = arr[0];
+    int idx = 0;
+    for (int i = 1; i < arr.length; i++) {
+      if (arr[i] > maxV) {
+        maxV = arr[i];
+        idx = i;
+      }
+    }
+    return idx;
+  }
+
+  int _minHourIndex(List<int> arr) {
+    if (arr.isEmpty) return 0;
+    int minV = arr[0];
+    int idx = 0;
+    for (int i = 1; i < arr.length; i++) {
+      if (arr[i] < minV) {
+        minV = arr[i];
+        idx = i;
+      }
+    }
+    return idx;
+  }
+
+  String _formatHM(int minutes) {
+    final h = minutes ~/ 60;
+    final m = minutes % 60;
+    if (h > 0 && m > 0) return '$h시간 $m분';
+    if (h > 0) return '$h시간';
+    return '$m분';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(
         children: [
           const SizedBox(height: 10),
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          if (_errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.only(left: 16), // ← 원하는 만큼 조절 (예: 16)
             child: Row(
@@ -47,6 +162,7 @@ class _StatisticsAllScreenState extends State<StatisticsAllScreen> {
                         startDate = selectedDates['startDate']!;
                         endDate = selectedDates['endDate']!;
                       });
+                      await _loadStats();
                     }
                   },
                   icon: const Icon(Icons.edit_outlined, size: 20),
@@ -59,36 +175,56 @@ class _StatisticsAllScreenState extends State<StatisticsAllScreen> {
           Container(
             child: OffsetOutlinedCard(
               padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
-              child: BarChartWidget(),
+              child: BarChartWidget(
+                values: _stats?.focusScoresPerHours ?? List.filled(24, 0),
+              ),
             ),
           ),
           const SizedBox(height: 30),
-          OffsetOutlinedCard(
-            padding: const EdgeInsets.fromLTRB(60, 16, 60, 16),
-            child: const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text("최대 집중 시간대 : "), Text("23시")],
-                ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Builder(
+            builder: (context) {
+              final hours =
+                  _stats?.focusScoresPerHours ?? List<int>.filled(24, 0);
+              final totalMin = _sumMinutes(hours);
+              final days = _daysInclusive(startDate, endDate);
+              final avgMin = days > 0 ? (totalMin / days).round() : 0;
+              final maxHour = _maxHourIndex(hours);
+              final minHour = _minHourIndex(hours);
+              final nick = _nickname ?? '회원';
 
-                  children: [Text("최소 집중 시간대 : "), Text("6시")],
+              return OffsetOutlinedCard(
+                padding: const EdgeInsets.fromLTRB(60, 16, 60, 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [const Text("최대 집중 시간대 : "), Text("$maxHour시")],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [const Text("최소 집중 시간대 : "), Text("$minHour시")],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text("하루 평균 집중 시간 : "),
+                        Text(_formatHM(avgMin)),
+                      ],
+                    ),
+                    const Divider(
+                      thickness: 1.2,
+                      color: Colors.black87,
+                      height: 32,
+                    ),
+                    const SizedBox(height: 15),
+                    Text("$nick님은 총 ${_formatHM(totalMin)} 집중했어요!"),
+                  ],
                 ),
-                SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [Text("하루 평균 집중 시간 : "), Text("10시")],
-                ),
-                Divider(thickness: 1.2, color: Colors.black87, height: 32),
-
-                SizedBox(height: 15),
-                Text("ㅇㅇ님은 총 ㅇㅇㅇㅇ시간 집중했어요!"),
-              ],
-            ),
+              );
+            },
           ),
           SizedBox(height: 40),
         ],
