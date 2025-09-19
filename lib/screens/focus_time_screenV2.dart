@@ -329,7 +329,7 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
         _isCameraInitialized && _cameraController != null
             ? FittedBox(
               fit: BoxFit.cover,
-              alignment: AlignmentGeometry.center,
+              alignment: Alignment.center,
               child: SizedBox(
                 width: MediaQuery.of(context).size.width,
                 child: CameraPreview(_cameraController!),
@@ -418,6 +418,7 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
                                           MediaQuery.of(context).size.height *
                                           0.4,
                                     ),
+                                    padding: EdgeInsets.fromLTRB(80, 0, 0, 0),
                                   ),
                                 );
                                 return;

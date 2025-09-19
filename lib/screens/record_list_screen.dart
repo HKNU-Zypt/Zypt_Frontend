@@ -25,6 +25,7 @@ DateTime _onToday(String hhmm) {
     now.day,
     int.parse(p[0]),
     int.parse(p[1]),
+    int.parse(p[2]),
   );
 }
 
@@ -82,9 +83,16 @@ String formatDuration(Duration d) {
 class _RecordListScreenState extends State<RecordListScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  // 집중 시작~끝 시간 예시
+
+  //  달별 데이터 캐시 추가
+  final Map<String, List<FocusTimeResponseDto>> _monthCache = {};
+
   List<FocusTimeResponseDto> _monthData = []; // 해당 달 전체 데이터
   List<FocusTimeResponseDto> _selectedDayData = []; // 선택한 날 데이터
+
+  // 캐시 키 함수
+  String _monthKey(DateTime day) =>
+      '${day.year}-${day.month.toString().padLeft(2, '0')}';
 
   @override
   void initState() {
@@ -95,6 +103,14 @@ class _RecordListScreenState extends State<RecordListScreen> {
 
   // 달 데이터 조회
   Future<void> _fetchMonthData(DateTime day) async {
+    final key = _monthKey(day);
+    if (_monthCache.containsKey(key)) {
+      setState(() {
+        _monthData = _monthCache[key]!;
+      });
+      _filterSelectedDayData(_selectedDay ?? day);
+      return;
+    }
     try {
       final data = await FocusTimeService().getFocusTimes(
         year: day.year,
@@ -102,13 +118,13 @@ class _RecordListScreenState extends State<RecordListScreen> {
       );
       setState(() {
         _monthData = data;
+        _monthCache[key] = data; // 캐시에 저장
       });
       _filterSelectedDayData(_selectedDay ?? day);
     } catch (e) {
-      // 예외 발생 시 처리
+      _monthData = [];
+      _monthCache[key] = [];
       print('달 데이터 조회 실패: $e');
-      // 필요하다면 에러 상태 변수에 저장해서 UI에 에러 메시지 표시도 가능
-      // setState(() { _errorMessage = e.toString(); });
     }
   }
 
@@ -344,18 +360,21 @@ class _FocusData extends StatelessWidget {
           _selectedDayData.isEmpty
               ? []
               : _selectedDayData.map((focusData) {
-                final startTime = focusData.startAt.substring(0, 5); // 'HH:mm'
-                final endTime = focusData.endAt.substring(0, 5); // 'HH:mm'
+                final startTime = focusData.startAt; // 'HH:mm'
+                final endTime = focusData.endAt; // 'HH:mm'
 
                 final startDt = _onToday(startTime);
                 final endDt = _onToday(endTime);
+
+                final startTimeForStudyTime = startTime.substring(0, 5);
+                final endTimeForStudyTime = endTime.substring(0, 5);
 
                 // unfocused 구간 변환
                 final unfocused =
                     focusData.unFocusedTimeDtos.map((dto) {
                       return TimeInterval(
-                        _onToday(dto.startAt.substring(0, 5)),
-                        _onToday(dto.endAt.substring(0, 5)),
+                        _onToday(dto.startAt),
+                        _onToday(dto.endAt),
                       );
                     }).toList();
 
@@ -472,7 +491,7 @@ class _FocusData extends StatelessWidget {
                                       SizedBox(width: 7),
                                       Flexible(
                                         child: Text(
-                                          "$startTime - $endTime",
+                                          "$startTimeForStudyTime - $endTimeForStudyTime",
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             fontSize: 10,

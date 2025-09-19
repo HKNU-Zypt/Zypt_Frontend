@@ -237,7 +237,10 @@ class _FocusTimelinePainter extends CustomPainter {
     tp.paint(canvas, offset);
   }
 
+  // 집중 안함 마커
   String _fmt(DateTime t) => '${_two(t.hour)}:${_two(t.minute)}';
+  // String _fmt(DateTime t) =>
+  //     '${_two(t.hour)}:${_two(t.minute)}:${_two(t.second)}';
 
   String _two(int v) => v.toString().padLeft(2, '0');
 
