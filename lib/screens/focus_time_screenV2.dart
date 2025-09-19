@@ -420,6 +420,7 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
                                           MediaQuery.of(context).size.height *
                                           0.4,
                                     ),
+                                    padding: EdgeInsets.fromLTRB(80, 0, 0, 0),
                                   ),
                                 );
                                 return;
