@@ -459,48 +459,68 @@ Future<Map<String, DateTime>?> showCalendarDialog(
                               });
                             },
                           ),
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                isSelectingStartDate = true;
-                                focusedDay = localStartDate;
-                              });
-                            },
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                DateFormat(
-                                  'MMM d, yyyy',
-                                ).format(localStartDate),
-                                style: TextStyle(
-                                  color:
-                                      isSelectingStartDate
-                                          ? Color(0xFF121212)
-                                          : Color(0xFF757575),
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'AppleSDGothicNeo-Bold',
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  isSelectingStartDate = true;
+                                  focusedDay = localStartDate;
+                                });
+                              },
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 4,
+                                ),
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  DateFormat(
+                                    'MMM d, yyyy',
+                                  ).format(localStartDate),
+                                  style: TextStyle(
+                                    color:
+                                        isSelectingStartDate
+                                            ? Color(0xFF121212)
+                                            : Color(0xFF757575),
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'AppleSDGothicNeo-Bold',
+                                  ),
+                                  maxLines: 1,
                                 ),
                               ),
                             ),
                           ),
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                isSelectingStartDate = false;
-                                focusedDay = localEndDate;
-                              });
-                            },
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                DateFormat('MMM d, yyyy').format(localEndDate),
-                                style: TextStyle(
-                                  color:
-                                      !isSelectingStartDate
-                                          ? Color(0xFF121212)
-                                          : Color(0xFF757575),
-                                  fontFamily: 'AppleSDGothicNeo-Bold',
-                                  fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  isSelectingStartDate = false;
+                                  focusedDay = localEndDate;
+                                });
+                              },
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 4,
+                                ),
+                              ),
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text(
+                                  DateFormat(
+                                    'MMM d, yyyy',
+                                  ).format(localEndDate),
+                                  style: TextStyle(
+                                    color:
+                                        !isSelectingStartDate
+                                            ? Color(0xFF121212)
+                                            : Color(0xFF757575),
+                                    fontFamily: 'AppleSDGothicNeo-Bold',
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
                                 ),
                               ),
                             ),
