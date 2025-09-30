@@ -13,6 +13,8 @@ class UserService {
   factory UserService() => _instance;
   UserService._internal();
 
+  final LoginService _loginService = LoginService();
+
   // 현재 사용자 정보 (메모리 캐시)
   User? _currentUser;
 
@@ -98,10 +100,13 @@ class UserService {
 
   // setNickname
   Future<bool> setNickname(String nickname) async {
-    final accessToken = await LoginService().getAccessToken();
-    final response = await http.post(
-      Uri.parse('http://$baseUrl/api/member/signup?nickName=$nickname'),
-      headers: {'Authorization': 'Bearer $accessToken'},
+    final headers = await _loginService.getAuthHeaders();
+    final uri = Uri.parse(
+      'http://$baseUrl/api/member/signup?nickName=$nickname',
+    );
+
+    final response = await _loginService.authorizedRequest(
+      () => http.post(uri, headers: headers),
     );
     if (response.statusCode == 200 || response.statusCode == 204) {
       // 닉네임 설정 성공 시 사용자 정보 업데이트
@@ -121,10 +126,11 @@ class UserService {
 
   // updateNickname
   Future<bool> updateNickname(String nickname) async {
-    final accessToken = await LoginService().getAccessToken();
-    final response = await http.patch(
-      Uri.parse('http://$baseUrl/api/member?nickName=$nickname'),
-      headers: {'Authorization': 'Bearer $accessToken'},
+    final headers = await _loginService.getAuthHeaders();
+    final uri = Uri.parse('http://$baseUrl/api/member?nickName=$nickname');
+
+    final response = await _loginService.authorizedRequest(
+      () => http.patch(uri, headers: headers),
     );
     if (response.statusCode == 200 || response.statusCode == 204) {
       // 닉네임 설정 성공 시 사용자 정보 업데이트
@@ -146,10 +152,11 @@ class UserService {
 
   // User 정보 가져오기
   Future<bool> getUser() async {
-    final accessToken = await LoginService().getAccessToken();
-    final response = await http.get(
-      Uri.parse('http://$baseUrl/api/member'),
-      headers: {'Authorization': 'Bearer $accessToken'},
+    final headers = await _loginService.getAuthHeaders();
+    final uri = Uri.parse('http://$baseUrl/api/member');
+
+    final response = await _loginService.authorizedRequest(
+      () => http.get(uri, headers: headers),
     );
     if (response.statusCode == 200) {
       print('zypt [UserService] getUser - response: ${response.body}');
