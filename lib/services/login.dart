@@ -28,13 +28,17 @@ class LoginService {
   // 인증이 필요한 HTTP 요청을 처리하는 메서드
   // 토큰 만료 시 자동으로 재발급을 시도합니다
   Future<http.Response> authorizedRequest(
-    Future<http.Response> Function() requestFn,
+    Future<http.Response> Function() Function() requestFnBuilder,
   ) async {
+    Future<http.Response> Function() requestFn = requestFnBuilder();
     http.Response response = await requestFn();
+
     if (response.statusCode == 401) {
       final refreshed = await refreshAccessToken();
 
       if (refreshed) {
+        // 토큰이 재발급되었으므로 새로운 헤더로 다시 요청
+        requestFn = requestFnBuilder();
         response = await requestFn();
       }
     }
@@ -278,11 +282,6 @@ class LoginService {
 
   // 로그아웃 (토큰 삭제)
   Future<bool> logout() async {
-    final prefsInstance = await prefs;
-    final accessToken = await getAccessToken();
-    await prefsInstance.remove('access_token');
-    await prefsInstance.remove('refresh_token');
-
     // UserService에서 사용자 정보 삭제
     try {
       await UserService().clearUser();
@@ -291,13 +290,19 @@ class LoginService {
       print('사용자 정보 삭제 실패: $e');
     }
 
-    print('zypt accessToken 확인: $accessToken');
     try {
-      final response = await http.post(
-        Uri.parse('http://$baseUrl/api/auth/logout'),
-        headers: {'Authorization': 'Bearer $accessToken'},
+      final response = await authorizedRequest(
+        () => () async {
+          return http.post(
+            Uri.parse('http://$baseUrl/api/auth/logout'),
+            headers: await getAuthHeaders(),
+          );
+        },
       );
       if (response.statusCode == 200) {
+        final prefsInstance = await prefs;
+        await prefsInstance.remove('access_token');
+        await prefsInstance.remove('refresh_token');
         print('zypt response: ${response.body}');
         print('zypt 로그아웃되었습니다.');
         return true;
@@ -338,22 +343,22 @@ class LoginService {
 
   //회원탈퇴
   Future<bool> withdraw() async {
-    final accessToken = await getAccessToken();
     final refreshToken = await getRefreshToken();
 
     final url = Uri.parse('http://$baseUrl/api/auth');
     final request = http.Request("DELETE", url);
-    request.headers.addAll({
-      'Authorization': 'Bearer $accessToken',
-      'Content-Type': 'application/json',
-    });
+    final authHeaders = await getAuthHeaders();
+    request.headers.addAll(authHeaders);
+    request.headers.addAll({'Content-Type': 'application/json'});
     request.body = jsonEncode({'refreshToken': refreshToken});
 
     try {
       final response = await authorizedRequest(
-        () => http.Client()
-            .send(request)
-            .then((response) => http.Response.fromStream(response)),
+        () => () async {
+          return http.Client()
+              .send(request)
+              .then((response) => http.Response.fromStream(response));
+        },
       );
 
       if (response.statusCode == 200) {
@@ -365,7 +370,7 @@ class LoginService {
         print('zypt 회원탈퇴 성공');
         return true;
       } else {
-        print('zypt 회원탈퇴 실패');
+        print('zypt 회원탈퇴 실패 ${response.statusCode}');
         return false;
       }
     } catch (e) {
