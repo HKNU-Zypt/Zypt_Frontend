@@ -28,24 +28,6 @@ class _NickNameScreenState extends State<NickNameScreen> {
     super.dispose();
   }
 
-  Future<void> _isNicknameSet(BuildContext context) async {
-    final userService = UserService();
-    final savedNickname = await userService.getNickname();
-    // 닉네임이 uuid 패턴인 경우 void
-
-    if (savedNickname != null) {
-      final uuidPattern = RegExp(
-        r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
-      );
-      if (uuidPattern.hasMatch(savedNickname)) {
-        return;
-      }
-      if (mounted) {
-        context.go('/home');
-      }
-    }
-  }
-
   Future<void> _saveNickname() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -108,8 +90,6 @@ class _NickNameScreenState extends State<NickNameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _isNicknameSet(context);
-
     return DefaultLayout(
       backgroundColor: Color(0xFFE6E5D3),
       child: Padding(

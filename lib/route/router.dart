@@ -15,6 +15,7 @@ import 'package:focused_study_time_tracker/screens/streaming_screen.dart';
 import 'package:focused_study_time_tracker/screens/terms_of_service_screen.dart';
 import 'package:go_router/go_router.dart';
 import 'package:focused_study_time_tracker/services/login.dart';
+import 'package:focused_study_time_tracker/services/user_service.dart';
 
 final router = GoRouter(
   initialLocation: '/home',
@@ -26,6 +27,23 @@ final router = GoRouter(
     if (!loggedIn && currentPath != '/login') {
       return '/login';
     }
+
+    // 닉네임 페이지 진입 시에만 검증
+    if (loggedIn && currentPath == '/nickname') {
+      final userService = UserService();
+      final savedNickname = await userService.getNickname();
+
+      // 닉네임이 이미 설정되어 있다면 홈으로 리다이렉트
+      if (savedNickname != null) {
+        final uuidPattern = RegExp(
+          r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
+        );
+        if (!uuidPattern.hasMatch(savedNickname)) {
+          return '/home';
+        }
+      }
+    }
+
     return null;
   },
   routes: [

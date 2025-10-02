@@ -370,7 +370,7 @@ class LoginService {
         print('zypt 회원탈퇴 성공');
         return true;
       } else {
-        print('zypt 회원탈퇴 실패');
+        print('zypt 회원탈퇴 실패 ${response.statusCode}');
         return false;
       }
     } catch (e) {
