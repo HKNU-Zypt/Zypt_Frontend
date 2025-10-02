@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:focused_study_time_tracker/components/statsCard.dart';
 import 'package:focused_study_time_tracker/layout/default_layout.dart';
 import 'package:focused_study_time_tracker/models/study_room.dart';
@@ -19,13 +18,23 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
   final LiveKitService _liveKitService = LiveKitService();
   final UserService _userService = UserService();
   final List<StudyRoom> _rooms = [];
+  final List<StudyRoom> _filteredRooms = [];
   String? _nickname;
+  String _searchQuery = '';
+  bool _isSearchMode = false;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadNickname();
     _loadRooms();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadNickname() async {
@@ -63,6 +72,41 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
         ).showSnackBar(SnackBar(content: Text('방 목록을 불러오는데 실패했습니다: $e')));
       }
     }
+  }
+
+  // 검색어로 방 목록 필터링
+  void _filterRooms(String query) {
+    setState(() {
+      _searchQuery = query;
+      if (query.isEmpty) {
+        _filteredRooms.clear();
+        _isSearchMode = false;
+      } else {
+        _isSearchMode = true;
+        _filteredRooms
+          ..clear()
+          ..addAll(
+            _rooms.where(
+              (room) => room.name.toLowerCase().contains(query.toLowerCase()),
+            ),
+          );
+      }
+    });
+  }
+
+  // 검색 모드 토글
+  void _toggleSearchMode() {
+    setState(() {
+      _isSearchMode = !_isSearchMode;
+      if (!_isSearchMode) {
+        _searchController.clear();
+        _searchQuery = '';
+        _filteredRooms.clear();
+      } else {
+        _searchController.clear();
+        FocusScope.of(context).requestFocus(FocusNode());
+      }
+    });
   }
 
   // 데모용: 다양한 참가자 수를 가진 방 목록을 즉시 주입
@@ -128,28 +172,62 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
           ],
         ),
         actions: [
-          CircleIconButton(
-            icon: Icons.search,
-            onTap: () {},
-            backgroundColor: Colors.black,
-            iconColor: Colors.white,
-          ),
-          const SizedBox(width: 8),
-          CircleIconButton(
-            icon: Icons.circle_notifications,
-            onTap: () {},
-            backgroundColor: const Color(0xFF222222),
-            iconColor: Colors.white,
-          ),
-          const SizedBox(width: 8),
-          CircleIconButton(
-            icon: Icons.face,
-            onTap: () {},
-            backgroundColor: Colors.white,
-            iconColor: Colors.black,
-            borderColor: Colors.black54,
-          ),
-          const SizedBox(width: 8),
+          if (_isSearchMode)
+            Expanded(
+              child: Container(
+                height: 40,
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: _filterRooms,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: (_) => FocusScope.of(context).unfocus(),
+                  onTapOutside: (_) {
+                    if (_searchQuery.isEmpty) {
+                      _toggleSearchMode();
+                    }
+                  },
+                  decoration: const InputDecoration(
+                    hintText: '방 제목 검색...',
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    hintStyle: TextStyle(color: Colors.grey),
+                  ),
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ),
+            ),
+          if (!_isSearchMode) ...[
+            CircleIconButton(
+              icon: Icons.search,
+              onTap: _toggleSearchMode,
+              backgroundColor: Colors.black,
+              iconColor: Colors.white,
+            ),
+            const SizedBox(width: 8),
+            CircleIconButton(
+              icon: Icons.circle_notifications,
+              onTap: () {},
+              backgroundColor: const Color(0xFF222222),
+              iconColor: Colors.white,
+            ),
+            const SizedBox(width: 8),
+            CircleIconButton(
+              icon: Icons.face,
+              onTap: () {},
+              backgroundColor: Colors.white,
+              iconColor: Colors.black,
+              borderColor: Colors.black54,
+            ),
+            const SizedBox(width: 8),
+          ],
         ],
       ),
       child: Padding(
@@ -171,7 +249,7 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
               child: RefreshIndicator(
                 onRefresh: _loadRooms,
                 child:
-                    _rooms.isEmpty
+                    _rooms.isEmpty && !_isSearchMode
                         ? ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.all(16),
@@ -191,11 +269,37 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
                             ),
                           ],
                         )
+                        : _isSearchMode && _filteredRooms.isEmpty
+                        ? ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          padding: const EdgeInsets.all(16),
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 40),
+                              child: Center(
+                                child: Text(
+                                  '"$_searchQuery"에 대한 검색 결과가 없습니다.\n다른 검색어를 입력해보세요.',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
                         : ListView.builder(
                           padding: const EdgeInsets.all(16),
-                          itemCount: _rooms.length,
+                          itemCount:
+                              _isSearchMode
+                                  ? _filteredRooms.length
+                                  : _rooms.length,
                           itemBuilder: (context, index) {
-                            final room = _rooms[index];
+                            final room =
+                                _isSearchMode
+                                    ? _filteredRooms[index]
+                                    : _rooms[index];
                             return _RoomCard(
                               room: room,
                               onTap: () async {
