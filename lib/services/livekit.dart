@@ -21,7 +21,6 @@ class LiveKitService {
     String roomName, {
     int maxParticipant = 10,
   }) async {
-    final headers = await _authHeaders();
     final uri = Uri.parse('http://$baseUrl/api/rooms/create').replace(
       queryParameters: {
         'roomName': roomName,
@@ -30,7 +29,10 @@ class LiveKitService {
     );
 
     final response = await _loginService.authorizedRequest(
-      () => http.post(uri, headers: headers),
+      () => () async {
+        final headers = await _authHeaders();
+        return http.post(uri, headers: headers);
+      },
     );
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonBody = json.decode(
@@ -44,10 +46,12 @@ class LiveKitService {
   }
 
   Future<String> joinRoomAndGetToken(String roomName) async {
-    final headers = await _authHeaders();
     final uri = Uri.parse('http://$baseUrl/api/rooms/$roomName');
     final response = await _loginService.authorizedRequest(
-      () => http.post(uri, headers: headers),
+      () => () async {
+        final headers = await _authHeaders();
+        return http.post(uri, headers: headers);
+      },
     );
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonBody = json.decode(
@@ -62,10 +66,12 @@ class LiveKitService {
 
   // ====== 추가: 룸/참가자 조회 및 삭제 ======
   Future<List<Map<String, dynamic>>?> fetchAllRooms() async {
-    final headers = await _authHeaders();
     final uri = Uri.parse('http://$baseUrl/api/rooms');
     final response = await _loginService.authorizedRequest(
-      () => http.get(uri, headers: headers),
+      () => () async {
+        final headers = await _authHeaders();
+        return http.get(uri, headers: headers);
+      },
     );
 
     if (response.statusCode == 200) {
@@ -83,10 +89,12 @@ class LiveKitService {
   }
 
   Future<List<Map<String, dynamic>>> fetchParticipants(String roomName) async {
-    final headers = await _authHeaders();
     final uri = Uri.parse('http://$baseUrl/api/rooms/$roomName/participant');
     final response = await _loginService.authorizedRequest(
-      () => http.get(uri, headers: headers),
+      () => () async {
+        final headers = await _authHeaders();
+        return http.get(uri, headers: headers);
+      },
     );
     if (response.statusCode == 200) {
       final List<dynamic> list = json.decode(utf8.decode(response.bodyBytes));
@@ -96,10 +104,12 @@ class LiveKitService {
   }
 
   Future<void> deleteRoom(String roomName) async {
-    final headers = await _authHeaders();
     final uri = Uri.parse('http://$baseUrl/api/rooms/$roomName');
     final response = await _loginService.authorizedRequest(
-      () => http.delete(uri, headers: headers),
+      () => () async {
+        final headers = await _authHeaders();
+        return http.delete(uri, headers: headers);
+      },
     );
     if (response.statusCode != 200) {
       throw Exception('룸 삭제 실패: ${response.statusCode} ${response.body}');
