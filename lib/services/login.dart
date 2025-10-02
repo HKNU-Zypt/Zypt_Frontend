@@ -344,14 +344,10 @@ class LoginService {
 
   //회원탈퇴
   Future<bool> withdraw() async {
-    final refreshToken = await getRefreshToken();
-
     final url = Uri.parse('http://$baseUrl/api/auth');
     final request = http.Request("DELETE", url);
     final authHeaders = await getAuthHeaders();
     request.headers.addAll(authHeaders);
-    request.headers.addAll({'Content-Type': 'application/json'});
-    request.body = jsonEncode({'refreshToken': refreshToken});
 
     try {
       final response = await authorizedRequest(
