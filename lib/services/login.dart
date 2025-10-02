@@ -35,6 +35,7 @@ class LoginService {
 
     if (response.statusCode == 401) {
       final refreshed = await refreshAccessToken();
+
       if (refreshed) {
         // 토큰이 재발급되었으므로 새로운 헤더로 다시 요청
         requestFn = requestFnBuilder();
