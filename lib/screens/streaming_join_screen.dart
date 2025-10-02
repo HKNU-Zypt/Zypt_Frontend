@@ -298,17 +298,6 @@ class _RoomCard extends StatelessWidget {
                           fontFamily: 'AppleSDGothicNeo',
                         ),
                       ),
-                      SizedBox(height: 8),
-                      // 설명 두 줄
-                      Text(
-                        'sub\n공부할 때 꿀팁 같이 공유해요',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey,
-                          fontFamily: 'AppleSDGothicNeo',
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -354,7 +343,7 @@ class _RoomCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            // 진행 바 + 시간
+            // 참가자 수 / 최대 참가자 수
             Row(
               children: [
                 Expanded(
@@ -383,7 +372,11 @@ class _RoomCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text('4:30', style: TextStyle(color: Colors.black54)),
+                // 참가자 수 / 최대 참가자 수
+                Text(
+                  '${room.numParticipants}/${room.maxParticipants}',
+                  style: TextStyle(color: Colors.black54),
+                ),
               ],
             ),
           ],

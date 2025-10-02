@@ -277,6 +277,7 @@ class LoginService {
   // 로그인 상태 확인 (토큰이 존재하는지)
   Future<bool> isLoggedIn() async {
     final accessToken = await getAccessToken();
+    print('zypt accessToken: $accessToken');
     return accessToken != null && accessToken.isNotEmpty;
   }
 

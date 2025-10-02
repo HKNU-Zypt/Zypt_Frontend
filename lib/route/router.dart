@@ -33,7 +33,8 @@ final router = GoRouter(
       final userService = UserService();
       final savedNickname = await userService.getNickname();
 
-      // 닉네임이 이미 설정되어 있다면 홈으로 리다이렉트
+      // 닉네임이 실제 닉네임으로 설정되어 있다면 홈으로 리다이렉트
+      // 닉네임이 설정되지 않았거나 UUID 패턴이면 닉네임 설정 페이지에 머무름
       if (savedNickname != null) {
         final uuidPattern = RegExp(
           r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
