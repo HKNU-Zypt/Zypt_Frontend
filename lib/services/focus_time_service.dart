@@ -10,15 +10,10 @@ class FocusTimeService {
   factory FocusTimeService() => _instance;
   FocusTimeService._internal();
 
-  Future<Map<String, String>> _authHeaders({Map<String, String>? extra}) async {
-    final access = await LoginService().getAccessToken();
-    final headers = <String, String>{
-      'Authorization': 'Bearer $access',
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      if (extra != null) ...extra,
-    };
-    return headers;
+  final LoginService _loginService = LoginService();
+
+  Future<Map<String, String>> _authHeaders() async {
+    return await _loginService.getAuthHeaders();
   }
 
   Uri _buildUri(String path, [Map<String, dynamic>? query]) {
@@ -47,10 +42,10 @@ class FocusTimeService {
   /// POST /api/focus_times
   Future<String> createFocusTime(FocusTimeInsertDto dto) async {
     final uri = _buildUri('/api/focus_times');
-    final response = await http.post(
-      uri,
-      headers: await _authHeaders(),
-      body: jsonEncode(dto.toJson()),
+    final headers = await _authHeaders();
+
+    final response = await _loginService.authorizedRequest(
+      () => http.post(uri, headers: headers, body: jsonEncode(dto.toJson())),
     );
     if (response.statusCode == 200) {
       return response.body; // "저장 성공"
@@ -71,7 +66,11 @@ class FocusTimeService {
     if (day != null) query['day'] = day;
 
     final uri = _buildUri('/api/focus_times', query);
-    final response = await http.get(uri, headers: await _authHeaders());
+    final headers = await _authHeaders();
+
+    final response = await _loginService.authorizedRequest(
+      () => http.get(uri, headers: headers),
+    );
     if (response.statusCode == 200) {
       return _parseListResponse(response.body);
     }
@@ -81,7 +80,11 @@ class FocusTimeService {
   /// GET /api/focus_times/all
   Future<List<FocusTimeResponseDto>> getAllFocusTimes() async {
     final uri = _buildUri('/api/focus_times/all');
-    final response = await http.get(uri, headers: await _authHeaders());
+    final headers = await _authHeaders();
+
+    final response = await _loginService.authorizedRequest(
+      () => http.get(uri, headers: headers),
+    );
     if (response.statusCode == 200) {
       return _parseListResponse(response.body);
     }
@@ -101,7 +104,11 @@ class FocusTimeService {
     if (day != null) query['day'] = day;
 
     final uri = _buildUri('/api/focus_times/date', query);
-    final response = await http.delete(uri, headers: await _authHeaders());
+    final headers = await _authHeaders();
+
+    final response = await _loginService.authorizedRequest(
+      () => http.delete(uri, headers: headers),
+    );
     if (response.statusCode == 200) {
       return response.body; // "집중 데이터 삭제 완료"
     }
@@ -114,7 +121,11 @@ class FocusTimeService {
     query['focusId'] = id;
 
     final uri = _buildUri('/api/focus_times', query);
-    final response = await http.delete(uri, headers: await _authHeaders());
+    final headers = await _authHeaders();
+
+    final response = await _loginService.authorizedRequest(
+      () => http.delete(uri, headers: headers),
+    );
     if (response.statusCode == 200) {
       return response.body; // "집중 데이터 삭제 완료"
     }
@@ -183,7 +194,11 @@ extension FocusTimeStatisticsApi on FocusTimeService {
       'to': _formatDate(to),
     };
     final uri = _buildUri('/api/focus_times/statistics', query);
-    final response = await http.get(uri, headers: await _authHeaders());
+    final headers = await _loginService.getAuthHeaders();
+
+    final response = await _loginService.authorizedRequest(
+      () => http.get(uri, headers: headers),
+    );
     if (response.statusCode == 200) {
       final map = jsonDecode(response.body) as Map<String, dynamic>;
       return FocusTimeStatisticsResponseDto.fromJson(map);

@@ -14,27 +14,7 @@ class LiveKitService {
   final LoginService _loginService = LoginService();
 
   Future<Map<String, String>> _authHeaders() async {
-    final accessToken = await _loginService.getAccessToken();
-    if (accessToken == null || accessToken.isEmpty) {
-      throw Exception('인증 토큰이 없습니다. 먼저 로그인 해주세요.');
-    }
-    return {
-      'Authorization': 'Bearer $accessToken',
-      'Content-Type': 'application/json',
-    };
-  }
-
-  Future<http.Response> _authorizedRequest(
-    Future<http.Response> Function() requestFn,
-  ) async {
-    http.Response response = await requestFn();
-    if (response.statusCode == 401) {
-      final refreshed = await _loginService.refreshAccessToken();
-      if (refreshed) {
-        response = await requestFn();
-      }
-    }
-    return response;
+    return await _loginService.getAuthHeaders();
   }
 
   Future<String> createRoomAndGetToken(
@@ -49,7 +29,7 @@ class LiveKitService {
       },
     );
 
-    final response = await _authorizedRequest(
+    final response = await _loginService.authorizedRequest(
       () => http.post(uri, headers: headers),
     );
     if (response.statusCode == 200) {
@@ -66,7 +46,7 @@ class LiveKitService {
   Future<String> joinRoomAndGetToken(String roomName) async {
     final headers = await _authHeaders();
     final uri = Uri.parse('http://$baseUrl/api/rooms/$roomName');
-    final response = await _authorizedRequest(
+    final response = await _loginService.authorizedRequest(
       () => http.post(uri, headers: headers),
     );
     if (response.statusCode == 200) {
@@ -84,7 +64,7 @@ class LiveKitService {
   Future<List<Map<String, dynamic>>?> fetchAllRooms() async {
     final headers = await _authHeaders();
     final uri = Uri.parse('http://$baseUrl/api/rooms');
-    final response = await _authorizedRequest(
+    final response = await _loginService.authorizedRequest(
       () => http.get(uri, headers: headers),
     );
 
@@ -105,7 +85,7 @@ class LiveKitService {
   Future<List<Map<String, dynamic>>> fetchParticipants(String roomName) async {
     final headers = await _authHeaders();
     final uri = Uri.parse('http://$baseUrl/api/rooms/$roomName/participant');
-    final response = await _authorizedRequest(
+    final response = await _loginService.authorizedRequest(
       () => http.get(uri, headers: headers),
     );
     if (response.statusCode == 200) {
@@ -118,7 +98,7 @@ class LiveKitService {
   Future<void> deleteRoom(String roomName) async {
     final headers = await _authHeaders();
     final uri = Uri.parse('http://$baseUrl/api/rooms/$roomName');
-    final response = await _authorizedRequest(
+    final response = await _loginService.authorizedRequest(
       () => http.delete(uri, headers: headers),
     );
     if (response.statusCode != 200) {

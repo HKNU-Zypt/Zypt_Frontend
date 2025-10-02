@@ -182,7 +182,7 @@ class _FocusTimelinePainter extends CustomPainter {
       if (m.showLabel) {
         _drawLabel(
           canvas,
-          Offset(m.x, labelY + (isResult ? 0 : 20)),
+          Offset(m.x, labelY + (isResult ? 0 : 8)),
           _fmt(m.time),
         );
       }

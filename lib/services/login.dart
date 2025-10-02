@@ -25,6 +25,34 @@ class LoginService {
     return _prefs!;
   }
 
+  // 인증이 필요한 HTTP 요청을 처리하는 메서드
+  // 토큰 만료 시 자동으로 재발급을 시도합니다
+  Future<http.Response> authorizedRequest(
+    Future<http.Response> Function() requestFn,
+  ) async {
+    http.Response response = await requestFn();
+    if (response.statusCode == 401) {
+      final refreshed = await refreshAccessToken();
+      if (refreshed) {
+        response = await requestFn();
+      }
+    }
+    return response;
+  }
+
+  // 인증 헤더를 생성하는 메서드 (다른 서비스에서 사용 가능하도록 public으로 변경)
+  Future<Map<String, String>> getAuthHeaders() async {
+    final accessToken = await getAccessToken();
+    if (accessToken == null || accessToken.isEmpty) {
+      throw Exception('인증 토큰이 없습니다. 먼저 로그인 해주세요.');
+    }
+    return {
+      'Authorization': 'Bearer $accessToken',
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+  }
+
   Future<bool> loginWithKakao() async {
     OAuthToken? token;
 
@@ -320,18 +348,27 @@ class LoginService {
     });
     request.body = jsonEncode({'refreshToken': refreshToken});
 
-    final response = await http.Client().send(request);
+    try {
+      final response = await authorizedRequest(
+        () => http.Client()
+            .send(request)
+            .then((response) => http.Response.fromStream(response)),
+      );
 
-    if (response.statusCode == 200) {
-      final prefsInstance = await prefs;
-      await prefsInstance.remove('access_token');
-      await prefsInstance.remove('refresh_token');
-      await UserService().clearUser();
+      if (response.statusCode == 200) {
+        final prefsInstance = await prefs;
+        await prefsInstance.remove('access_token');
+        await prefsInstance.remove('refresh_token');
+        await UserService().clearUser();
 
-      print('zypt 회원탈퇴 성공');
-      return true;
-    } else {
-      print('zypt 회원탈퇴 실패');
+        print('zypt 회원탈퇴 성공');
+        return true;
+      } else {
+        print('zypt 회원탈퇴 실패');
+        return false;
+      }
+    } catch (e) {
+      print('회원탈퇴 실패: $e');
       return false;
     }
   }
