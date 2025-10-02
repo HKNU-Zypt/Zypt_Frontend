@@ -33,6 +33,7 @@ class LoginService {
     http.Response response = await requestFn();
     if (response.statusCode == 401) {
       final refreshed = await refreshAccessToken();
+
       if (refreshed) {
         response = await requestFn();
       }

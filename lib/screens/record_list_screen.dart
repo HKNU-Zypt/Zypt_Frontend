@@ -470,6 +470,7 @@ class _FocusData extends StatelessWidget {
                           end: _onToday(endTime),
                           unfocused: unfocused, // ← 동적으로 생성된 unfocused 리스트
                           height: 25,
+                          isResult: true,
                         ),
                         SizedBox(height: 15),
                         Column(
