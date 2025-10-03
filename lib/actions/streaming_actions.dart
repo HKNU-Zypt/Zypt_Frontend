@@ -32,7 +32,8 @@ class StreamingActions {
     if (result == null) return;
 
     final String roomName = result['name']?.trim() ?? '';
-    final int maxParticipant = int.tryParse((result['max'] ?? '').trim()) ?? 10;
+    final int maxParticipant =
+        int.tryParse((result['maxParticipants'] ?? '').trim()) ?? 10;
     if (roomName.isEmpty) {
       ScaffoldMessenger.of(
         context,
