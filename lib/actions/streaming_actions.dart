@@ -20,13 +20,13 @@ class StreamingActions {
       fields: [
         const FormDialogFieldConfig(id: 'name', hintText: '방 이름'),
         FormDialogFieldConfig(
-          id: 'max',
+          id: 'maxParticipants', // maxParticipants -> 버튼으로 조절, max -> 텍스트 필드로 조절
           hintText: '최대 참가자',
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         ),
       ],
-      primaryButtonText: '생성하기',
+      primaryButtonText: '그룹 생성하기',
     );
 
     if (result == null) return;
