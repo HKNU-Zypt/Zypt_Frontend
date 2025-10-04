@@ -1,7 +1,3 @@
-import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
-
-OAuthToken? token;
-
 // 안드로이드 용 baseUrl
 // String baseUrl = '10.0.2.2:8080';
 // String baseUrl = '192.168.219.106:8080';
