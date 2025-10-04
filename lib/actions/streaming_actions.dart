@@ -20,19 +20,20 @@ class StreamingActions {
       fields: [
         const FormDialogFieldConfig(id: 'name', hintText: '방 이름'),
         FormDialogFieldConfig(
-          id: 'max',
+          id: 'maxParticipants', // maxParticipants -> 버튼으로 조절, max -> 텍스트 필드로 조절
           hintText: '최대 참가자',
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         ),
       ],
-      primaryButtonText: '생성하기',
+      primaryButtonText: '그룹 생성하기',
     );
 
     if (result == null) return;
 
     final String roomName = result['name']?.trim() ?? '';
-    final int maxParticipant = int.tryParse((result['max'] ?? '').trim()) ?? 10;
+    final int maxParticipant =
+        int.tryParse((result['maxParticipants'] ?? '').trim()) ?? 10;
     if (roomName.isEmpty) {
       ScaffoldMessenger.of(
         context,

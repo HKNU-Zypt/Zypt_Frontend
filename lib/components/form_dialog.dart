@@ -27,7 +27,7 @@ Future<Map<String, String>?> showFormDialog(
   required List<FormDialogFieldConfig> fields,
   String primaryButtonText = '저장',
   bool barrierDismissible = false,
-  Color primaryColor = const Color(0xFFEF5A43),
+  Color primaryColor = const Color(0xFF000000),
 }) async {
   final Map<String, TextEditingController> controllers = {
     for (final f in fields)
@@ -52,6 +52,7 @@ Future<Map<String, String>?> showFormDialog(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // 해더
                 Stack(
                   alignment: Alignment.centerLeft,
                   children: [
@@ -79,50 +80,77 @@ Future<Map<String, String>?> showFormDialog(
                 ),
                 const SizedBox(height: 16),
                 ...fields.map((f) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: TextFormField(
-                      controller: controllers[f.id],
-                      obscureText: f.obscureText,
-                      keyboardType: f.keyboardType,
-                      inputFormatters: f.inputFormatters,
-                      textAlign: TextAlign.center,
-                      textAlignVertical: TextAlignVertical.center,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
+                  if (f.id == 'maxParticipants') {
+                    // 버튼으로만 조절하는 필드
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: MaxParticipantsField(
+                        min: 2,
+                        max: 4,
+                        initialValue: int.tryParse(f.initialValue ?? '2') ?? 2,
+                        onChanged: (value) {
+                          controllers[f.id]?.text = value.toString();
+                        },
                       ),
-                      decoration: InputDecoration(
-                        isDense: true,
-                        hintText: f.hintText,
-                        hintStyle: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
+                    );
+                  } else {
+                    // 기본 TextFormField
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: TextFormField(
+                        controller: controllers[f.id],
+                        obscureText: f.obscureText,
+                        keyboardType: f.keyboardType,
+                        inputFormatters: f.inputFormatters,
+                        textAlign: TextAlign.center,
+                        textAlignVertical: TextAlignVertical.center,
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
                           fontFamily: 'AppleSDGothicNeo',
                         ),
-                        filled: true,
-                        fillColor: Colors.grey,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: 12,
+                        decoration: InputDecoration(
+                          isDense: true,
+                          hintText: f.hintText,
+                          hintStyle: const TextStyle(
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'AppleSDGothicNeo',
+                          ),
+                          filled: true,
+                          fillColor: Colors.white,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color: Colors.black,
+                              width: 1,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color: Colors.black,
+                              width: 1,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color: Colors.black,
+                              width: 1,
+                            ),
+                          ),
                         ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(32),
-                          borderSide: BorderSide.none,
-                        ),
+                        validator: f.validator,
                       ),
-                      validator: f.validator,
-                    ),
-                  );
+                    );
+                  }
                 }),
                 const SizedBox(height: 4),
+                // 생성하기 버튼
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -132,7 +160,7 @@ Future<Map<String, String>?> showFormDialog(
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32),
+                        borderRadius: BorderRadius.circular(10),
                         side: const BorderSide(color: Colors.black, width: 2),
                       ),
                     ),
@@ -148,6 +176,7 @@ Future<Map<String, String>?> showFormDialog(
                       primaryButtonText,
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
+                        color: Colors.white,
                         fontFamily: 'AppleSDGothicNeo',
                         fontSize: 16,
                       ),
@@ -169,4 +198,113 @@ Future<Map<String, String>?> showFormDialog(
     }
   });
   return result;
+}
+
+class MaxParticipantsField extends StatefulWidget {
+  final int min;
+  final int max;
+  final int initialValue;
+  final ValueChanged<int> onChanged;
+
+  const MaxParticipantsField({
+    super.key,
+    this.min = 2,
+    this.max = 20,
+    this.initialValue = 2,
+    required this.onChanged,
+  });
+
+  @override
+  _MaxParticipantsFieldState createState() => _MaxParticipantsFieldState();
+}
+
+class _MaxParticipantsFieldState extends State<MaxParticipantsField> {
+  late int _value;
+
+  @override
+  void initState() {
+    super.initState();
+    _value = widget.initialValue;
+  }
+
+  void _increment() {
+    if (_value < widget.max) {
+      setState(() => _value++);
+      widget.onChanged(_value);
+    }
+  }
+
+  void _decrement() {
+    if (_value > widget.min) {
+      setState(() => _value--);
+      widget.onChanged(_value);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          onPressed: _decrement,
+          icon: Stack(
+            alignment: Alignment.center,
+            children: [
+              Transform.translate(
+                offset: const Offset(1, 0), // x=4픽셀 오른쪽 이동
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              const Icon(
+                Icons.remove_circle,
+                color: Color(0xFFF3A753),
+                size: 28,
+              ),
+            ],
+          ),
+        ),
+        SizedBox(width: 20),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          decoration: BoxDecoration(color: Colors.white),
+          child: Text(
+            '$_value',
+            style: const TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'AppleSDGothicNeo',
+            ),
+          ),
+        ),
+        SizedBox(width: 20),
+        IconButton(
+          onPressed: _increment,
+          icon: Stack(
+            alignment: Alignment.center,
+            children: [
+              Transform.translate(
+                offset: const Offset(1, 0), // x=4픽셀 오른쪽 이동
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              const Icon(Icons.add_circle, color: Color(0xFFF3A753), size: 28),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }
