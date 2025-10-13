@@ -11,26 +11,33 @@ class FocusTimelineBar extends StatelessWidget {
   final DateTime start;
   final DateTime end;
   final List<TimeInterval> unfocused;
+  // SLEEP(졸음) 구간 추가
+  final List<TimeInterval> sleep;
   final double height;
   final double trackHeight;
   final double radius;
   final EdgeInsets padding;
   final Color baseColor;
   final Color segmentColor;
+  // SLEEP 색상
+  final Color sleepColor;
   final Color endpointColor;
   final Color markerFill;
+  final Color sleepMarkerFill;
   final Color markerBorder;
   final bool isResult;
 
   // NEW: 집중X 구간 라벨 표시 여부
   final bool showUnfocusedLabels;
+  // SLEEP 라벨 표시 여부
+  final bool showSleepLabels;
 
   const FocusTimelineBar({
     super.key,
     required this.start,
     required this.end,
-
     this.unfocused = const [],
+    this.sleep = const [],
     this.height = 88,
     this.trackHeight = 2,
     this.radius = 5,
@@ -39,9 +46,13 @@ class FocusTimelineBar extends StatelessWidget {
     this.segmentColor = const Color(0xFFF95C3B), // 집중X 구간
     this.endpointColor = const Color(0xFF6BAB93), // 양끝 점
     this.markerFill = const Color(0xFFF95C3B), // 집중X 구간 경계
+
+    this.sleepColor = const Color.fromARGB(255, 197, 196, 182), // SLEEP 기본 라벤더
+    this.sleepMarkerFill = const Color(0xFFE6E5D3), // SLEEP 마커
+
     this.markerBorder = const Color(0xFFF95C3B),
-    // 기본값: 집중X 구간 라벨 숨김
     this.showUnfocusedLabels = false,
+    this.showSleepLabels = false,
     this.isResult = false,
   });
 
@@ -55,15 +66,19 @@ class FocusTimelineBar extends StatelessWidget {
           start: start,
           end: end,
           unfocused: unfocused,
+          sleep: sleep,
           trackHeight: trackHeight,
           radius: radius,
           padding: padding,
           baseColor: baseColor,
           segmentColor: segmentColor,
+          sleepColor: sleepColor,
           endpointColor: endpointColor,
           markerFill: markerFill,
+          sleepMarkerFill: sleepMarkerFill,
           markerBorder: markerBorder,
-          showUnfocusedLabels: showUnfocusedLabels, // ← 전달
+          showUnfocusedLabels: showUnfocusedLabels,
+          showSleepLabels: showSleepLabels,
           textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontSize: 12,
             color: Colors.black87,
@@ -79,27 +94,34 @@ class FocusTimelineBar extends StatelessWidget {
 class _FocusTimelinePainter extends CustomPainter {
   final DateTime start, end;
   final List<TimeInterval> unfocused;
+  final List<TimeInterval> sleep;
   final double trackHeight, radius;
   final EdgeInsets padding;
   final Color baseColor, segmentColor, endpointColor, markerFill, markerBorder;
+  final Color sleepColor, sleepMarkerFill;
   final TextStyle? textStyle;
-  final bool showUnfocusedLabels; // NEW
-  final bool isResult; // 결과 화면 여부 (라벨 위치 조정용)
+  final bool showUnfocusedLabels;
+  final bool showSleepLabels;
+  final bool isResult;
 
   _FocusTimelinePainter({
     required this.start,
     required this.end,
     required this.unfocused,
+    required this.sleep,
     required this.trackHeight,
     required this.radius,
     required this.padding,
     required this.baseColor,
     required this.segmentColor,
+    required this.sleepColor,
     required this.endpointColor,
     required this.markerFill,
+    required this.sleepMarkerFill,
     required this.markerBorder,
     required this.textStyle,
-    required this.showUnfocusedLabels, // NEW
+    required this.showUnfocusedLabels,
+    required this.showSleepLabels,
     this.isResult = false,
   });
 
@@ -120,8 +142,7 @@ class _FocusTimelinePainter extends CustomPainter {
     final base =
         Paint()
           ..color = baseColor
-          ..strokeWidth =
-              trackHeight // 선 두께
+          ..strokeWidth = trackHeight
           ..strokeCap = StrokeCap.round;
     canvas.drawLine(Offset(left, y), Offset(right, y), base);
 
@@ -130,13 +151,31 @@ class _FocusTimelinePainter extends CustomPainter {
           ..color = segmentColor
           ..strokeWidth = trackHeight
           ..strokeCap = StrokeCap.round;
-    final clean = _normalizeIntervals(unfocused, start, end);
 
+    final sleepPaint =
+        Paint()
+          ..color = sleepColor
+          ..strokeWidth = trackHeight
+          ..strokeCap = StrokeCap.round;
+
+    final clean = _normalizeIntervals(unfocused, start, end);
+    final sleepClean = _normalizeIntervals(sleep, start, end);
+
+    // 먼저 unfocused (집중X) 그리기
     for (final it in clean) {
       canvas.drawLine(
         Offset(toX(it.start), y),
         Offset(toX(it.end), y),
         segPaint,
+      );
+    }
+
+    // SLEEP 구간 그리기 (색상 구분)
+    for (final it in sleepClean) {
+      canvas.drawLine(
+        Offset(toX(it.start), y),
+        Offset(toX(it.end), y),
+        sleepPaint,
       );
     }
 
@@ -163,19 +202,42 @@ class _FocusTimelinePainter extends CustomPainter {
       _Marker(toX(start), start, isEndpoint: true, showLabel: true),
       _Marker(toX(end), end, isEndpoint: true, showLabel: true),
       for (final it in clean)
-        _Marker(toX(it.start), it.start, showLabel: showUnfocusedLabels),
+        _Marker(
+          toX(it.start),
+          it.start,
+          type: 'unfocused',
+          showLabel: showUnfocusedLabels,
+        ),
       for (final it in clean)
-        _Marker(toX(it.end), it.end, showLabel: showUnfocusedLabels),
+        _Marker(
+          toX(it.end),
+          it.end,
+          type: 'unfocused',
+          showLabel: showUnfocusedLabels,
+        ),
+      // sleep 구간 경계 마커
+      for (final it in sleepClean)
+        _Marker(
+          toX(it.start),
+          it.start,
+          type: 'sleep',
+          showLabel: showSleepLabels,
+        ),
+      for (final it in sleepClean)
+        _Marker(toX(it.end), it.end, type: 'sleep', showLabel: showSleepLabels),
     ]..sort((a, b) => a.x.compareTo(b.x));
 
     for (final m in markers) {
       if (!m.isEndpoint) {
-        final fill = Paint()..color = markerFill;
+        // 마커 타입별 색상 선택
+        final fillColor = m.type == 'sleep' ? sleepMarkerFill : markerFill;
+        final borderColor = m.type == 'sleep' ? sleepMarkerFill : markerBorder;
+        final fill = Paint()..color = fillColor;
         final border =
             Paint()
               ..style = PaintingStyle.stroke
               ..strokeWidth = 1.2
-              ..color = markerBorder;
+              ..color = borderColor;
         canvas.drawCircle(Offset(m.x, y), smallR, fill);
         canvas.drawCircle(Offset(m.x, y), smallR, border);
       }
@@ -249,13 +311,16 @@ class _FocusTimelinePainter extends CustomPainter {
       old.start != start ||
       old.end != end ||
       old.unfocused != unfocused ||
+      old.sleep != sleep ||
       old.trackHeight != trackHeight ||
       old.radius != radius ||
       old.padding != padding ||
       old.baseColor != baseColor ||
       old.segmentColor != segmentColor ||
+      old.sleepColor != sleepColor ||
       old.endpointColor != endpointColor ||
       old.markerFill != markerFill ||
+      old.sleepMarkerFill != sleepMarkerFill ||
       old.markerBorder != markerBorder;
 }
 
@@ -264,5 +329,12 @@ class _Marker {
   final DateTime time;
   final bool isEndpoint;
   final bool showLabel;
-  _Marker(this.x, this.time, {this.isEndpoint = false, this.showLabel = false});
+  final String type; // 'unfocused', 'sleep', ''
+  _Marker(
+    this.x,
+    this.time, {
+    this.isEndpoint = false,
+    this.showLabel = false,
+    this.type = '',
+  });
 }

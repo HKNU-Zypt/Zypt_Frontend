@@ -31,19 +31,22 @@ class FocusResultScreen extends StatelessWidget {
     Duration totalUnfocusedDuration = Duration.zero;
     int sleepCount = 0;
     int distractedCount = 0;
-    List<TimeInterval> unfocusedIntervals = [];
+    final List<TimeInterval> distractedIntervals = [];
+    final List<TimeInterval> sleepIntervals = [];
 
-    for (var unfocused in sessionData.fragmentedUnFocusedTimeInsertDtos) {
-      final start = parseDateTime(sessionData.createDate, unfocused.startAt);
-      final end = parseDateTime(sessionData.createDate, unfocused.endAt);
-      totalUnfocusedDuration += end.difference(start);
+    for (var u in sessionData.fragmentedUnFocusedTimeInsertDtos) {
+      final start = parseDateTime(sessionData.createDate, u.startAt);
+      final end = parseDateTime(sessionData.createDate, u.endAt);
+      final dur = end.difference(start);
+      totalUnfocusedDuration += dur;
 
-      if (unfocused.type == UnFocusedType.SLEEP) {
+      if (u.type == UnFocusedType.SLEEP) {
         sleepCount++;
+        sleepIntervals.add(TimeInterval(start, end));
       } else {
         distractedCount++;
+        distractedIntervals.add(TimeInterval(start, end));
       }
-      unfocusedIntervals.add(TimeInterval(start, end));
     }
 
     final totalFocusedDuration = totalStudyDuration - totalUnfocusedDuration;
@@ -86,7 +89,8 @@ class FocusResultScreen extends StatelessWidget {
               child: FocusTimelineBar(
                 start: sessionStart,
                 end: sessionEnd,
-                unfocused: unfocusedIntervals,
+                unfocused: distractedIntervals,
+                sleep: sleepIntervals,
                 height: 45,
               ),
             ),
