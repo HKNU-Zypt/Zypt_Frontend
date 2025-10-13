@@ -371,12 +371,26 @@ class _FocusData extends StatelessWidget {
 
                 // unfocused 구간 변환
                 final unfocused =
-                    focusData.unFocusedTimeDtos.map((dto) {
-                      return TimeInterval(
-                        _onToday(dto.startAt),
-                        _onToday(dto.endAt),
-                      );
-                    }).toList();
+                    focusData.unFocusedTimeDtos
+                        .where((dto) => dto.type == UnFocusedType.DISTRACTED)
+                        .map(
+                          (dto) => TimeInterval(
+                            _onToday(dto.startAt),
+                            _onToday(dto.endAt),
+                          ),
+                        )
+                        .toList();
+
+                final sleepIntervals =
+                    focusData.unFocusedTimeDtos
+                        .where((dto) => dto.type == UnFocusedType.SLEEP)
+                        .map(
+                          (dto) => TimeInterval(
+                            _onToday(dto.startAt),
+                            _onToday(dto.endAt),
+                          ),
+                        )
+                        .toList();
 
                 // 전체 구간, 집중 구간 미리 계산
                 final totalDuration = endDt.difference(startDt);
@@ -469,6 +483,7 @@ class _FocusData extends StatelessWidget {
                           start: _onToday(startTime),
                           end: _onToday(endTime),
                           unfocused: unfocused, // ← 동적으로 생성된 unfocused 리스트
+                          sleep: sleepIntervals,
                           height: 25,
                           isResult: true,
                         ),
