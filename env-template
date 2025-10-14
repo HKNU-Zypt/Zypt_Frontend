@@ -6,5 +6,8 @@ NAVER_CLIENT_ID=YOUR_NAVER_CLIENT_ID
 NAVER_CLIENT_SECRET=YOUR_NAVER_CLIENT_SECRET
 NAVER_APP_NAME=focused_study_time_tracker
 
+# 구글 로그인 설정 (구글 클라우드 콘솔에서 발급받은 값으로 변경하세요)
+GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID
+
 # Livekit
 LIVEKIT_URL=

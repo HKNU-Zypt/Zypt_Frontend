@@ -4,6 +4,7 @@ import 'package:flutter_naver_login/interface/types/naver_login_result.dart';
 import 'package:flutter_naver_login/interface/types/naver_login_status.dart';
 import 'package:flutter_naver_login/interface/types/naver_token.dart';
 import 'package:focused_study_time_tracker/const.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
@@ -121,11 +122,19 @@ class LoginService {
   Future<bool> loginWithGoogle() async {
     // 구글 로그인 구현 예제
     try {
+      // 환경변수에서 구글 클라이언트 ID 가져오기
+      String? googleClientId = dotenv.env['GOOGLE_CLIENT_ID'];
+
+      if (googleClientId == null || googleClientId.isEmpty) {
+        print('구글 클라이언트 ID가 설정되지 않았습니다.');
+        googleClientId =
+            "880578430112-3dg028mvc6jn0rsmplc7ln1rfe2bc072.apps.googleusercontent.com";
+
+        return false;
+      }
+
       // print('구글 로그인 초기화');
-      GoogleSignIn.instance.initialize(
-        serverClientId:
-            "880578430112-3dg028mvc6jn0rsmplc7ln1rfe2bc072.apps.googleusercontent.com",
-      );
+      GoogleSignIn.instance.initialize(serverClientId: googleClientId);
 
       // print('구글 로그인 시도');
       final GoogleSignInAccount googleUser =
