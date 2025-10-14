@@ -36,6 +36,7 @@ class BarChartWidget extends StatelessWidget {
       ),
       series: <CartesianSeries<StudyData, String>>[
         ColumnSeries<StudyData, String>(
+          color: const Color(0xFFF95C3B),
           dataSource: chartData,
           xValueMapper: (StudyData times, _) => times.hours,
           yValueMapper: (StudyData times, _) => times.studytime,
