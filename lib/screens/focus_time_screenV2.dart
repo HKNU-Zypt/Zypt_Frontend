@@ -161,6 +161,13 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
         _currentUnfocusedType = null;
       }
 
+      //비 집중구간이 n초 이하이면 삭제
+      _unfocusedFragments.removeWhere((fragment) {
+        final start = DateTime.parse('$fragment.startAt');
+        final end = DateTime.parse('$fragment.endAt');
+        return end.difference(start).inSeconds <= 3;
+      });
+
       final dto = FocusTimeInsertDto(
         startAt: _formatTime(_sessionStartAt!),
         endAt: _formatTime(endAt),
