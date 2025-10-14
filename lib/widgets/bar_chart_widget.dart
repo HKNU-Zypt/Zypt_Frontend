@@ -23,7 +23,6 @@ class BarChartWidget extends StatelessWidget {
         ),
       ),
       primaryXAxis: const CategoryAxis(
-        title: AxisTitle(text: '시간대', textStyle: TextStyle(fontSize: 10)),
         majorGridLines: MajorGridLines(width: 0), // X축 주 격자 제거
         axisLine: AxisLine(width: 0), // X축 선 제거
         interval: 1,
