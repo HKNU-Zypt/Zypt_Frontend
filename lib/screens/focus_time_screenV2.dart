@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' as math;
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:focused_study_time_tracker/layout/default_layout.dart';
@@ -42,6 +41,8 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
   DateTime? _currentUnfocusedStart;
   UnFocusedType? _currentUnfocusedType;
 
+  bool isNormalExiting = false;
+
   @override
   void initState() {
     super.initState();
@@ -62,8 +63,9 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
   void dispose() {
     _elapsedTimer?.cancel();
 
-    // 화면 종료 시에는 상태 변경 없이 자원만 정리
-    _finalizeAndPost();
+    if (!isNormalExiting) {
+      _finalizeAndPost();
+    }
     _stopCamera(updateState: false);
     _orientationSubscription?.cancel();
     _analyzer.dispose();
@@ -328,15 +330,6 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
     }
   }
 
-  // 카메라를 키고 끄기 위한 버튼에 적용되는 함수.
-  void _toggleCamera() {
-    if (_isCameraInitialized) {
-      _stopCamera();
-    } else {
-      _startCamera();
-    }
-  }
-
   // UI
   @override
   Widget build(BuildContext context) {
@@ -441,6 +434,7 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
                               }
                               // 1. _finalizeAndPost 함수를 호출하여 dto 데이터를 받습니다.
                               final sessionData = _finalizeAndPost();
+                              isNormalExiting = true;
 
                               // 2. 데이터가 null이 아닌지 확인합니다. (안전장치)
                               if (sessionData != null) {
