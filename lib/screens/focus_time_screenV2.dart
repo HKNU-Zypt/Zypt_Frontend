@@ -163,9 +163,9 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
 
       //비 집중구간이 n초 이하이면 삭제
       _unfocusedFragments.removeWhere((fragment) {
-        final start = DateTime.parse('$fragment.startAt');
-        final end = DateTime.parse('$fragment.endAt');
-        return end.difference(start).inSeconds <= 3;
+        final startSeconds = _timeToSeconds(fragment.startAt);
+        final endSeconds = _timeToSeconds(fragment.endAt);
+        return (endSeconds - startSeconds) <= 3;
       });
 
       final dto = FocusTimeInsertDto(
@@ -217,6 +217,13 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
 
   String _formatTime(DateTime dt) => DateFormat('HH:mm:ss').format(dt);
   String _formatDate(DateTime dt) => DateFormat('yyyy-MM-dd').format(dt);
+
+  int _timeToSeconds(String time) {
+    final parts = time.split(':');
+    return int.parse(parts[0]) * 3600 +
+        int.parse(parts[1]) * 60 +
+        int.parse(parts[2]);
+  }
 
   void _handleAnalysisResult(String label) {
     // 집중: null, 졸음: SLEEP, 그 외(집중안함/얼굴 미감지/분석 오류 등): DISTRACTED
