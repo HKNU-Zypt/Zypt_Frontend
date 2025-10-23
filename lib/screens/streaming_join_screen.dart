@@ -109,48 +109,6 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
     });
   }
 
-  // 데모용: 다양한 참가자 수를 가진 방 목록을 즉시 주입
-  void _populateMockRooms() {
-    final List<StudyRoom> mockRooms = [
-      StudyRoom(
-        id: 'r1',
-        name: '좋은 정보 공유',
-        numParticipants: 1,
-        maxParticipants: 8,
-      ),
-      StudyRoom(
-        id: 'r2',
-        name: '꾸준히 공부해요',
-        numParticipants: 3,
-        maxParticipants: 8,
-      ),
-      StudyRoom(
-        id: 'r3',
-        name: '집중 모드 ON',
-        numParticipants: 5,
-        maxParticipants: 8,
-      ),
-      StudyRoom(
-        id: 'r4',
-        name: '시험 대비 스터디',
-        numParticipants: 8,
-        maxParticipants: 8,
-      ),
-      StudyRoom(
-        id: 'r5',
-        name: '개발 면접 준비',
-        numParticipants: 11,
-        maxParticipants: 12,
-      ),
-    ];
-    if (!mounted) return;
-    setState(() {
-      _rooms
-        ..clear()
-        ..addAll(mockRooms);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return DefaultLayout(
@@ -158,19 +116,6 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
         leadingWidth: 100,
         toolbarHeight: 60,
         backgroundColor: Colors.white,
-        leading: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(width: 8),
-            CircleIconButton(
-              icon: Icons.notes_outlined,
-              onTap: _populateMockRooms,
-              backgroundColor: Colors.black,
-              iconColor: Colors.white,
-            ),
-            const SizedBox(width: 8),
-          ],
-        ),
         actions: [
           if (_isSearchMode)
             Expanded(
@@ -210,21 +155,6 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
               onTap: _toggleSearchMode,
               backgroundColor: Colors.black,
               iconColor: Colors.white,
-            ),
-            const SizedBox(width: 8),
-            CircleIconButton(
-              icon: Icons.circle_notifications,
-              onTap: () {},
-              backgroundColor: const Color(0xFF222222),
-              iconColor: Colors.white,
-            ),
-            const SizedBox(width: 8),
-            CircleIconButton(
-              icon: Icons.face,
-              onTap: () {},
-              backgroundColor: Colors.white,
-              iconColor: Colors.black,
-              borderColor: Colors.black54,
             ),
             const SizedBox(width: 8),
           ],
