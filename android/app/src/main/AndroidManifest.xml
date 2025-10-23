@@ -9,7 +9,7 @@
     <uses-feature android:name="android.hardware.camera.autofocus" />
     
     <application
-        android:label="focused_study_time_tracker"
+        android:label="Zypt"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 
