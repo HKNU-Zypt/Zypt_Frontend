@@ -20,7 +20,7 @@ if (envFile.exists()) {
 }
 
 android {
-    namespace = "com.fstt.focused_study_time_tracker"
+    namespace = "com.zypt.focused_study_time_tracker"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -35,7 +35,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.fstt.focused_study_time_tracker"
+        applicationId = "com.zypt.focused_study_time_tracker"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
