@@ -37,7 +37,7 @@ class _MyPageScreenState extends State<MyPageScreen> {
             Column(
               children: [
                 Text(
-                  '마이페이지',
+                  '프로필',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,

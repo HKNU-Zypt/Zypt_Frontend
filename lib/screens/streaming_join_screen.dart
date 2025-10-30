@@ -113,6 +113,15 @@ class _StreamingJoinScreenState extends State<StreamingJoinScreen> {
   Widget build(BuildContext context) {
     return DefaultLayout(
       appBar: AppBar(
+        title: Text(
+          '스트리밍',
+          style: TextStyle(
+            fontSize: 24,
+            fontFamily: 'SoyoMaple',
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        centerTitle: true,
         leadingWidth: 100,
         toolbarHeight: 60,
         backgroundColor: Colors.white,
