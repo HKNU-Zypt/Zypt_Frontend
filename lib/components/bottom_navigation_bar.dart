@@ -34,7 +34,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
       Icons.missed_video_call,
       Icons.person,
     ];
-    final labels = <String>['Home', 'Statistics', 'Streaming', '마이페이지'];
+    final labels = <String>['Home', 'Statistics', 'Streaming', 'Profile'];
 
     return Container(
       color: Colors.transparent,
