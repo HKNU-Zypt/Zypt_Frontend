@@ -100,9 +100,7 @@ class UserService {
 
   // setNickname
   Future<bool> setNickname(String nickname) async {
-    final uri = Uri.parse(
-      'http://$baseUrl/api/member/signup?nickName=$nickname',
-    );
+    final uri = buildApiUri('/api/member/signup', {'nickName': nickname});
 
     final response = await _loginService.authorizedRequest(
       () => () async {
@@ -128,7 +126,7 @@ class UserService {
 
   // updateNickname
   Future<bool> updateNickname(String nickname) async {
-    final uri = Uri.parse('http://$baseUrl/api/member?nickName=$nickname');
+    final uri = buildApiUri('/api/member', {'nickName': nickname});
 
     final response = await _loginService.authorizedRequest(
       () => () async {
@@ -156,7 +154,7 @@ class UserService {
 
   // User 정보 가져오기
   Future<bool> getUser() async {
-    final uri = Uri.parse('http://$baseUrl/api/member');
+    final uri = buildApiUri('/api/member');
 
     final response = await _loginService.authorizedRequest(
       () => () async {

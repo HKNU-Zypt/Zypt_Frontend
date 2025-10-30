@@ -16,12 +16,6 @@ class FocusTimeService {
     return await _loginService.getAuthHeaders();
   }
 
-  Uri _buildUri(String path, [Map<String, dynamic>? query]) {
-    final uri = Uri.parse('http://$baseUrl$path');
-    if (query == null || query.isEmpty) return uri;
-    return uri.replace(queryParameters: query.map((k, v) => MapEntry(k, '$v')));
-  }
-
   void _validateDateQuery({int? year, int? month, int? day}) {
     final hasYear = year != null;
     final hasMonth = month != null;
@@ -41,7 +35,7 @@ class FocusTimeService {
 
   /// POST /api/focus_times
   Future<String> createFocusTime(FocusTimeInsertDto dto) async {
-    final uri = _buildUri('/api/focus_times');
+    final uri = buildApiUri('/api/focus_times');
 
     final response = await _loginService.authorizedRequest(
       () => () async {
@@ -67,7 +61,7 @@ class FocusTimeService {
     if (month != null) query['month'] = month;
     if (day != null) query['day'] = day;
 
-    final uri = _buildUri('/api/focus_times', query);
+    final uri = buildApiUri('/api/focus_times', query);
 
     final response = await _loginService.authorizedRequest(
       () => () async {
@@ -83,7 +77,7 @@ class FocusTimeService {
 
   /// GET /api/focus_times/all
   Future<List<FocusTimeResponseDto>> getAllFocusTimes() async {
-    final uri = _buildUri('/api/focus_times/all');
+    final uri = buildApiUri('/api/focus_times/all');
 
     final response = await _loginService.authorizedRequest(
       () => () async {
@@ -109,7 +103,7 @@ class FocusTimeService {
     if (month != null) query['month'] = month;
     if (day != null) query['day'] = day;
 
-    final uri = _buildUri('/api/focus_times/date', query);
+    final uri = buildApiUri('/api/focus_times/date', query);
 
     final response = await _loginService.authorizedRequest(
       () => () async {
@@ -128,7 +122,7 @@ class FocusTimeService {
     final query = <String, dynamic>{};
     query['focusId'] = id;
 
-    final uri = _buildUri('/api/focus_times', query);
+    final uri = buildApiUri('/api/focus_times', query);
 
     final response = await _loginService.authorizedRequest(
       () => () async {
@@ -203,7 +197,7 @@ extension FocusTimeStatisticsApi on FocusTimeService {
       'from': _formatDate(from),
       'to': _formatDate(to),
     };
-    final uri = _buildUri('/api/focus_times/statistics', query);
+    final uri = buildApiUri('/api/focus_times/statistics', query);
 
     final response = await _loginService.authorizedRequest(
       () => () async {

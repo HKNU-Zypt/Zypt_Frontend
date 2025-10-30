@@ -218,7 +218,7 @@ class LoginService {
     // token : 토큰값
 
     final response = await http.post(
-      Uri.parse('http://$baseUrl/api/auth/login'),
+      buildApiUri('/api/auth/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'type': type,
@@ -304,7 +304,7 @@ class LoginService {
       final response = await authorizedRequest(
         () => () async {
           return http.post(
-            Uri.parse('http://$baseUrl/api/auth/logout'),
+            buildApiUri('/api/auth/logout'),
             headers: await getAuthHeaders(),
           );
         },
@@ -332,7 +332,7 @@ class LoginService {
     final refreshToken = await getRefreshToken();
     try {
       final response = await http.post(
-        Uri.parse('http://$baseUrl/api/auth/refresh'),
+        buildApiUri('/api/auth/refresh'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'refreshToken': refreshToken}),
       );
@@ -353,7 +353,7 @@ class LoginService {
 
   //회원탈퇴
   Future<bool> withdraw() async {
-    final url = Uri.parse('http://$baseUrl/api/auth');
+    final url = buildApiUri('/api/auth');
     final request = http.Request("DELETE", url);
     final authHeaders = await getAuthHeaders();
     request.headers.addAll(authHeaders);

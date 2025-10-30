@@ -21,12 +21,10 @@ class LiveKitService {
     String roomName, {
     int maxParticipant = 10,
   }) async {
-    final uri = Uri.parse('http://$baseUrl/api/rooms/create').replace(
-      queryParameters: {
-        'roomName': roomName,
-        'maxParticipant': maxParticipant.toString(),
-      },
-    );
+    final uri = buildApiUri('/api/rooms/create', {
+      'roomName': roomName,
+      'maxParticipant': maxParticipant.toString(),
+    });
 
     final response = await _loginService.authorizedRequest(
       () => () async {
@@ -46,7 +44,7 @@ class LiveKitService {
   }
 
   Future<String> joinRoomAndGetToken(String roomName) async {
-    final uri = Uri.parse('http://$baseUrl/api/rooms/$roomName');
+    final uri = buildApiUri('/api/rooms/$roomName');
     final response = await _loginService.authorizedRequest(
       () => () async {
         final headers = await _authHeaders();
@@ -66,7 +64,7 @@ class LiveKitService {
 
   // ====== 추가: 룸/참가자 조회 및 삭제 ======
   Future<List<Map<String, dynamic>>?> fetchAllRooms() async {
-    final uri = Uri.parse('http://$baseUrl/api/rooms');
+    final uri = buildApiUri('/api/rooms');
     final response = await _loginService.authorizedRequest(
       () => () async {
         final headers = await _authHeaders();
@@ -89,7 +87,7 @@ class LiveKitService {
   }
 
   Future<List<Map<String, dynamic>>> fetchParticipants(String roomName) async {
-    final uri = Uri.parse('http://$baseUrl/api/rooms/$roomName/participant');
+    final uri = buildApiUri('/api/rooms/$roomName/participant');
     final response = await _loginService.authorizedRequest(
       () => () async {
         final headers = await _authHeaders();
@@ -104,7 +102,7 @@ class LiveKitService {
   }
 
   Future<void> deleteRoom(String roomName) async {
-    final uri = Uri.parse('http://$baseUrl/api/rooms/$roomName');
+    final uri = buildApiUri('/api/rooms/$roomName');
     final response = await _loginService.authorizedRequest(
       () => () async {
         final headers = await _authHeaders();
