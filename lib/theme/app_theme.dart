@@ -26,26 +26,4 @@ class AppTheme {
       ),
     );
   }
-
-  /// 다크 테마 (필요 시 사용)
-  static ThemeData dark() {
-    final ColorScheme scheme = ColorScheme.fromSeed(
-      seedColor: brandSeedColor,
-      brightness: Brightness.dark,
-    );
-
-    return ThemeData(
-      colorScheme: scheme,
-      primaryColor: brandSeedColor,
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: scheme.primary,
-          foregroundColor: scheme.onPrimary,
-        ),
-      ),
-      snackBarTheme: const SnackBarThemeData(
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
 }

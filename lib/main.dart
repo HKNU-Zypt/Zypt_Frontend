@@ -31,7 +31,6 @@ class MyApp extends StatelessWidget {
       title: 'Zypt',
       routerConfig: router,
       theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
     );
   }
 }
