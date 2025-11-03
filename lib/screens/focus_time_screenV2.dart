@@ -407,31 +407,6 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
                         _isLocked
                             ? null
                             : () {
-                              if (_elapsed.inSeconds < 60) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('최소한 1분 이상 진행해주세요.'),
-                                    duration: Duration(seconds: 2),
-                                    backgroundColor: Colors.black.withOpacity(
-                                      0.7,
-                                    ), // 투명도 70%
-                                    behavior:
-                                        SnackBarBehavior
-                                            .floating, // (선택) 위로 띄우기
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    margin: EdgeInsets.symmetric(
-                                      horizontal: 40,
-                                      vertical:
-                                          MediaQuery.of(context).size.height *
-                                          0.4,
-                                    ),
-                                    padding: EdgeInsets.fromLTRB(80, 0, 0, 0),
-                                  ),
-                                );
-                                return;
-                              }
                               // 1. _finalizeAndPost 함수를 호출하여 dto 데이터를 받습니다.
                               final sessionData = _finalizeAndPost();
                               isNormalExiting = true;

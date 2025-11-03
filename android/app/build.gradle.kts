@@ -38,10 +38,10 @@ android {
         applicationId = "com.zypt.focused_study_time_tracker"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        minSdk = 22
+        targetSdk = 36
+        versionCode = 1
+        versionName = "1.0"
 
         val kakaoKey = dotenv["KAKAO_NATIVE_APP_KEY"] as String?
         if (kakaoKey == null) {
