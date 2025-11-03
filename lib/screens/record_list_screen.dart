@@ -85,7 +85,7 @@ class _RecordListScreenState extends State<RecordListScreen> {
   DateTime? _selectedDay;
 
   //  달별 데이터 캐시 추가
-  final Map<String, List<FocusTimeResponseDto>> _monthCache = {};
+  static final Map<String, List<FocusTimeResponseDto>> _monthCache = {};
 
   List<FocusTimeResponseDto> _monthData = []; // 해당 달 전체 데이터
   List<FocusTimeResponseDto> _selectedDayData = []; // 선택한 날 데이터
@@ -97,8 +97,19 @@ class _RecordListScreenState extends State<RecordListScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedDay = _focusedDay;
-    _fetchMonthData(_focusedDay); // 첫 진입 시 현재 달 데이터 가져오기
+
+    // 오늘 날짜 기준
+    final today = DateTime.now();
+    final firstDayOfMonth = DateTime(today.year, today.month, 1);
+
+    // 오늘이 현재 달이면 오늘 선택, 아니면 1일 선택
+    _focusedDay = today;
+    _selectedDay =
+        (today.month == _focusedDay.month && today.year == _focusedDay.year)
+            ? today
+            : firstDayOfMonth;
+
+    _fetchMonthData(_focusedDay);
   }
 
   // 달 데이터 조회
@@ -146,6 +157,55 @@ class _RecordListScreenState extends State<RecordListScreen> {
     );
   }
 
+  // 공통: 해당 day에 데이터 있는지
+  bool _hasDataForDay(DateTime day) {
+    // 둘 다 로컬 기준으로 비교 (서버 createDate는 Z 없으면 로컬로 파싱됨)
+    final localDay = day.toLocal();
+    return _monthData.any((e) {
+      final d = DateTime.parse(e.createDate).toLocal();
+      return d.year == localDay.year &&
+          d.month == localDay.month &&
+          d.day == localDay.day;
+    });
+  }
+
+  // 공통: 셀 UI 빌더
+  Widget _buildDayCell(
+    DateTime day, {
+    required bool isSelected,
+    required bool isToday,
+  }) {
+    final bool hasData = _hasDataForDay(day);
+    final bool isOutside = day.month != _focusedDay.month;
+
+    // 배경 색 (네 현재 스타일 유지)
+    Color bg =
+        isSelected
+            ? const Color(0xFF407362)
+            : isOutside
+            ? const Color(0xff798B85)
+            : const Color(0xffACC9BF);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: bg,
+        shape: BoxShape.circle,
+        // 데이터 있는 날에만 테두리
+        border:
+            hasData
+                ? Border.all(color: const Color(0xFF407362), width: 2)
+                : null,
+      ),
+      child: Center(
+        child: Text('${day.day}', style: const TextStyle(color: Colors.black)),
+      ),
+    );
+  }
+
+  bool isSameMonth(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -176,11 +236,10 @@ class _RecordListScreenState extends State<RecordListScreen> {
                 onPageChanged: (focusedDay) {
                   setState(() {
                     _focusedDay = focusedDay;
-                    _selectedDay = DateTime(
-                      focusedDay.year,
-                      focusedDay.month,
-                      1,
-                    ); // ← 1일로 초기화
+                    _selectedDay =
+                        (isSameMonth(focusedDay, DateTime.now()))
+                            ? DateTime.now()
+                            : DateTime(focusedDay.year, focusedDay.month, 1);
                   });
                   _filterSelectedDayData(_selectedDay!); // 1일 데이터로 필터링
                   _fetchMonthData(focusedDay); // ← 달이 바뀔 때마다 해당 달 데이터 조회
@@ -206,33 +265,23 @@ class _RecordListScreenState extends State<RecordListScreen> {
                     size: 40,
                   ),
                 ),
+
                 calendarBuilders: CalendarBuilders(
+                  // 일반 셀
                   defaultBuilder: (context, day, focusedDay) {
-                    final hasData = _monthData.any((e) {
-                      final date = DateTime.parse(e.createDate);
-                      return date.year == day.year &&
-                          date.month == day.month &&
-                          date.day == day.day;
-                    });
-                    if (hasData) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: Color(0xffACC9BF),
-                          border: Border.all(
-                            color: Color(0xFF407362),
-                            width: 2,
-                          ), // 원하는 테두리 색/두께
-                          shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${day.day}',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                        ),
-                      );
-                    }
-                    return null; // 기본 렌더링
+                    return _buildDayCell(
+                      day,
+                      isSelected: false,
+                      isToday: false,
+                    );
+                  },
+                  // 오늘 셀 (여기가 핵심: defaultBuilder가 아니라 이 경로로 옴)
+                  todayBuilder: (context, day, focusedDay) {
+                    return _buildDayCell(day, isSelected: false, isToday: true);
+                  },
+                  // 선택 셀
+                  selectedBuilder: (context, day, focusedDay) {
+                    return _buildDayCell(day, isSelected: true, isToday: false);
                   },
                 ),
                 calendarStyle: const CalendarStyle(
