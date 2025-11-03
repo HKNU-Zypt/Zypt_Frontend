@@ -139,6 +139,13 @@ class _RecordListScreenState extends State<RecordListScreen> {
     });
   }
 
+  bool _hasFocusDataFor(DateTime day) {
+    // 예: _focusDataList가 집중이 있었던 날짜들의 리스트라면
+    return _selectedDayData.any(
+      (data) => isSameDay(DateTime.parse(data.createDate), day),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -157,6 +164,8 @@ class _RecordListScreenState extends State<RecordListScreen> {
                 lastDay: DateTime.utc(2035, 12, 31),
 
                 onDaySelected: (selectedDay, focusedDay) {
+                  // 이전/다음 달 날짜 클릭 방지
+                  if (selectedDay.month != _focusedDay.month) return;
                   setState(() {
                     _selectedDay = selectedDay;
                     _focusedDay = focusedDay;
@@ -167,7 +176,13 @@ class _RecordListScreenState extends State<RecordListScreen> {
                 onPageChanged: (focusedDay) {
                   setState(() {
                     _focusedDay = focusedDay;
+                    _selectedDay = DateTime(
+                      focusedDay.year,
+                      focusedDay.month,
+                      1,
+                    ); // ← 1일로 초기화
                   });
+                  _filterSelectedDayData(_selectedDay!); // 1일 데이터로 필터링
                   _fetchMonthData(focusedDay); // ← 달이 바뀔 때마다 해당 달 데이터 조회
                 },
 
@@ -180,16 +195,45 @@ class _RecordListScreenState extends State<RecordListScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                   formatButtonVisible: false,
-                  leftChevronIcon: Icon(
+                  leftChevronIcon: const Icon(
                     Icons.arrow_left_outlined,
                     color: Color(0xFFD9D9D9),
                     size: 40,
                   ),
-                  rightChevronIcon: Icon(
+                  rightChevronIcon: const Icon(
                     Icons.arrow_right_outlined,
                     color: Color(0xFFD9D9D9),
                     size: 40,
                   ),
+                ),
+                calendarBuilders: CalendarBuilders(
+                  defaultBuilder: (context, day, focusedDay) {
+                    final hasData = _monthData.any((e) {
+                      final date = DateTime.parse(e.createDate);
+                      return date.year == day.year &&
+                          date.month == day.month &&
+                          date.day == day.day;
+                    });
+                    if (hasData) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Color(0xffACC9BF),
+                          border: Border.all(
+                            color: Color(0xFF407362),
+                            width: 2,
+                          ), // 원하는 테두리 색/두께
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${day.day}',
+                            style: TextStyle(color: Colors.black),
+                          ),
+                        ),
+                      );
+                    }
+                    return null; // 기본 렌더링
+                  },
                 ),
                 calendarStyle: const CalendarStyle(
                   todayDecoration: BoxDecoration(
@@ -202,28 +246,22 @@ class _RecordListScreenState extends State<RecordListScreen> {
                     shape: BoxShape.circle,
                   ),
                   weekendTextStyle: TextStyle(color: Colors.black),
-                  // 선택된 날짜 스타일
                   selectedDecoration: BoxDecoration(
                     color: Color(0xFF407362),
                     shape: BoxShape.circle,
                   ),
-
-                  // 기본 날짜 스타일
                   defaultDecoration: BoxDecoration(
                     color: Color(0xffACC9BF),
                     shape: BoxShape.circle,
                   ),
-
-                  // 지난달/다음달 날짜
                   outsideDecoration: BoxDecoration(
                     color: Color(0xff798B85),
                     shape: BoxShape.circle,
                   ),
                   outsideTextStyle: TextStyle(color: Colors.white),
                   selectedTextStyle: TextStyle(color: Colors.black),
-                  // ↓↓↓ 추가
-                  cellMargin: EdgeInsets.zero, // 셀 사이 여백 최소
-                  cellPadding: EdgeInsets.zero, // 셀 내부 여백 최소
+                  cellMargin: EdgeInsets.zero,
+                  cellPadding: EdgeInsets.zero,
                 ),
               ),
             ),
