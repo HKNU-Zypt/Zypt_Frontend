@@ -241,6 +241,24 @@ class _RecordListScreenState extends State<RecordListScreen> {
                   _fetchMonthData(focusedDay); // ← 달이 바뀔 때마다 해당 달 데이터 조회
                 },
 
+                calendarBuilders: CalendarBuilders(
+                  // 일반 셀
+                  defaultBuilder: (context, day, focusedDay) {
+                    return _buildDayCell(
+                      day,
+                      isSelected: false,
+                      isToday: false,
+                    );
+                  },
+                  // 오늘 셀 (여기가 핵심: defaultBuilder가 아니라 이 경로로 옴)
+                  todayBuilder: (context, day, focusedDay) {
+                    return _buildDayCell(day, isSelected: false, isToday: true);
+                  },
+                  // 선택 셀
+                  selectedBuilder: (context, day, focusedDay) {
+                    return _buildDayCell(day, isSelected: true, isToday: false);
+                  },
+                ),
                 headerStyle: HeaderStyle(
                   titleCentered: true,
                   titleTextFormatter:
