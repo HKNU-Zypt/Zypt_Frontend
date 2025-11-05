@@ -98,18 +98,23 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
   // 이미지와 화면 각도를 같이 받아 화면 각도에 따라 이미지를 회전시키기 위한 함수.
   // 이미지 회전은 유틸로 이동
 
+  // (간단화) 별도 선택 함수 없이 _startCamera에서 인라인 처리
+
   // 카메라 켰을 때
   Future<void> _startCamera() async {
     if (_cameraController != null) return;
 
     try {
-      final frontCamera = cameras.firstWhere(
+      if (cameras.isEmpty) {
+        throw Exception('Camera not found');
+      }
+      final selectedCamera = cameras.firstWhere(
         (cam) => cam.lensDirection == CameraLensDirection.front,
-        orElse: () => throw Exception('Front camera not found'),
+        orElse: () => cameras.first,
       );
 
       _cameraController = CameraController(
-        frontCamera,
+        selectedCamera,
         ResolutionPreset.medium,
         enableAudio: false,
         imageFormatGroup: ImageFormatGroup.yuv420,
@@ -128,9 +133,9 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
         _focusStatus = '카메라 준비 완료';
       });
     } catch (e) {
-      setState(() {
-        _focusStatus = '카메라 초기화 실패: $e';
-      });
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$e')));
+      context.go('/home');
     }
   }
 
