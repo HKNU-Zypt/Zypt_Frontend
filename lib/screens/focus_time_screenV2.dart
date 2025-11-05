@@ -11,6 +11,7 @@ import 'package:focused_study_time_tracker/utils/image_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class FocusTimeScreenV2 extends StatefulWidget {
   const FocusTimeScreenV2({super.key});
@@ -50,6 +51,7 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
     _sessionStartAt = DateTime.now();
     _initializeCamera();
     _analyzer.initialize();
+    WakelockPlus.enable();
     // 실시간 경과 시간 타이머 시작
     _elapsedTimer = Timer.periodic(Duration(seconds: 1), (_) {
       if (!mounted || _sessionStartAt == null) return;
@@ -61,6 +63,7 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
 
   @override
   void dispose() {
+    WakelockPlus.disable();
     _elapsedTimer?.cancel();
 
     if (!isNormalExiting) {
