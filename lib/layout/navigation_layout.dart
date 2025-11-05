@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:focused_study_time_tracker/actions/streaming_actions.dart';
 
 class NavigationLayout extends StatelessWidget {
-  const NavigationLayout({super.key, required this.child});
-  final Widget child;
+  const NavigationLayout({super.key, required this.navigationShell});
+  final StatefulNavigationShell navigationShell;
   @override
   Widget build(BuildContext context) {
     final String path = GoRouterState.of(context).uri.path;
@@ -125,10 +125,12 @@ class NavigationLayout extends StatelessWidget {
     }();
 
     return Scaffold(
-      body: SafeArea(child: child),
+      body: SafeArea(child: navigationShell),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: fab,
-      bottomNavigationBar: const CustomBottomNavigationBar(),
+      bottomNavigationBar: CustomBottomNavigationBar(
+        navigationShell: navigationShell,
+      ),
     );
   }
 }

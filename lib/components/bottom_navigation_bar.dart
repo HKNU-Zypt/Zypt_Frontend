@@ -3,24 +3,13 @@ import 'package:go_router/go_router.dart';
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
-  const CustomBottomNavigationBar({super.key});
+  const CustomBottomNavigationBar({super.key, required this.navigationShell});
 
-  _getIdx(BuildContext context) {
-    if (GoRouterState.of(context).uri.toString() == '/home') {
-      return 0;
-    } else if (GoRouterState.of(context).uri.toString() == '/statistics') {
-      return 1;
-    } else if (GoRouterState.of(context).uri.toString() == '/streaming') {
-      return 2;
-    } else if (GoRouterState.of(context).uri.toString() == '/mypage') {
-      return 3;
-    }
-    return 0; // 예외 처리
-  }
+  final StatefulNavigationShell navigationShell;
 
   @override
   Widget build(BuildContext context) {
-    final int currentIndex = _getIdx(context);
+    final int currentIndex = navigationShell.currentIndex;
 
     final iconsInactive = <IconData>[
       Icons.center_focus_strong_sharp,
@@ -83,20 +72,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
           );
         },
         onTap: (value) {
-          switch (value) {
-            case 0:
-              context.go('/home');
-              break;
-            case 1:
-              context.go('/statistics');
-              break;
-            case 2:
-              context.go('/streaming');
-              break;
-            case 3:
-              context.go('/mypage');
-              break;
-          }
+          navigationShell.goBranch(value, initialLocation: false);
         },
       ),
     );

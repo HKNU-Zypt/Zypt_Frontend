@@ -48,28 +48,47 @@ final router = GoRouter(
     return null;
   },
   routes: [
-    /// ShellRoute로 바텀 네비게이션이 있는 구조 정의
-    ShellRoute(
-      builder: (context, state, child) {
-        return NavigationLayout(child: child); // 공통 UI: 하단 네비게이션 포함
+    // 바텀 네비게이션이 있는 구조를 상태 보존 가능한 IndexedStack으로 구성
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) {
+        return NavigationLayout(navigationShell: navigationShell);
       },
-      routes: [
-        GoRoute(path: '/home', builder: (context, state) => HomeScreen()),
-        GoRoute(
-          path: '/statistics',
-          builder: (context, state) => StatisticsScreenv2(),
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(path: '/home', builder: (context, state) => HomeScreen()),
+            GoRoute(
+              path: '/result',
+              builder: (context, state) {
+                final sessionData = state.extra as FocusTimeInsertDto;
+                return FocusResultScreen(sessionData: sessionData);
+              },
+            ),
+          ],
         ),
-        GoRoute(
-          path: '/streaming',
-          builder: (context, state) => StreamingJoinScreen(),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/statistics',
+              builder: (context, state) => StatisticsScreenv2(),
+            ),
+          ],
         ),
-        GoRoute(path: '/mypage', builder: (context, state) => MyPageScreen()),
-        GoRoute(
-          path: '/result',
-          builder: (context, state) {
-            final sessionData = state.extra as FocusTimeInsertDto;
-            return FocusResultScreen(sessionData: sessionData);
-          },
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/streaming',
+              builder: (context, state) => StreamingJoinScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/mypage',
+              builder: (context, state) => MyPageScreen(),
+            ),
+          ],
         ),
       ],
     ),
