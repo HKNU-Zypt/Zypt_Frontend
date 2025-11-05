@@ -4,6 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:focused_study_time_tracker/layout/default_layout.dart';
 import 'package:focused_study_time_tracker/models/focus_time.dart';
+import 'package:focused_study_time_tracker/screens/record_list_screen.dart';
 import 'package:focused_study_time_tracker/services/focus_time_service.dart';
 import 'package:native_device_orientation/native_device_orientation.dart';
 import 'package:focused_study_time_tracker/services/focus_analyzer_service.dart';
@@ -198,6 +199,13 @@ class _FocusTimeScreenV2State extends State<FocusTimeScreenV2> {
             .createFocusTime(dto)
             .then((msg) {
               debugPrint('FocusTime POST 성공: $msg');
+              String _monthKey(DateTime day) =>
+                  '${day.year}-${day.month.toString().padLeft(2, '0')}';
+
+              // 오늘 날짜 기준으로 캐시 삭제
+              final today = DateTime.now();
+              final key = _monthKey(today);
+              RecordListScreenState.monthCache.remove(key);
             })
             .catchError((e) {
               debugPrint('FocusTime POST 실패: $e');

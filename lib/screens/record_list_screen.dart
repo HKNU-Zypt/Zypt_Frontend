@@ -11,7 +11,7 @@ class RecordListScreen extends StatefulWidget {
   const RecordListScreen({super.key});
 
   @override
-  State<RecordListScreen> createState() => _RecordListScreenState();
+  State<RecordListScreen> createState() => RecordListScreenState();
 }
 
 DateTime now = DateTime.now();
@@ -80,12 +80,12 @@ String formatDuration(Duration d) {
   }
 }
 
-class _RecordListScreenState extends State<RecordListScreen> {
+class RecordListScreenState extends State<RecordListScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
 
   //  달별 데이터 캐시 추가
-  static final Map<String, List<FocusTimeResponseDto>> _monthCache = {};
+  static final Map<String, List<FocusTimeResponseDto>> monthCache = {};
 
   List<FocusTimeResponseDto> _monthData = []; // 해당 달 전체 데이터
   List<FocusTimeResponseDto> _selectedDayData = []; // 선택한 날 데이터
@@ -115,9 +115,9 @@ class _RecordListScreenState extends State<RecordListScreen> {
   // 달 데이터 조회
   Future<void> _fetchMonthData(DateTime day) async {
     final key = _monthKey(day);
-    if (_monthCache.containsKey(key)) {
+    if (monthCache.containsKey(key)) {
       setState(() {
-        _monthData = _monthCache[key]!;
+        _monthData = monthCache[key]!;
       });
       _filterSelectedDayData(_selectedDay ?? day);
       return;
@@ -129,12 +129,12 @@ class _RecordListScreenState extends State<RecordListScreen> {
       );
       setState(() {
         _monthData = data;
-        _monthCache[key] = data; // 캐시에 저장
+        monthCache[key] = data; // 캐시에 저장
       });
       _filterSelectedDayData(_selectedDay ?? day);
     } catch (e) {
       _monthData = [];
-      _monthCache[key] = [];
+      monthCache[key] = [];
       print('달 데이터 조회 실패: $e');
     }
   }
@@ -545,7 +545,7 @@ class _FocusData extends StatelessWidget {
                                     final state =
                                         context
                                             .findAncestorStateOfType<
-                                              _RecordListScreenState
+                                              RecordListScreenState
                                             >();
                                     if (state != null) {
                                       state.setState(() {
