@@ -1,8 +1,5 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:focused_study_time_tracker/screens/focus_time_screen.dart';
 import 'package:focused_study_time_tracker/services/user_service.dart';
 
 class HomeScreen extends StatefulWidget {
