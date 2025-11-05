@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:focused_study_time_tracker/layout/default_layout.dart';
 import 'package:focused_study_time_tracker/screens/record_list_screen.dart';
 import 'package:focused_study_time_tracker/screens/statistics_all_screen.dart';
-import 'package:go_router/go_router.dart';
 
 class StatisticsScreenv2 extends StatefulWidget {
   const StatisticsScreenv2({super.key});
@@ -11,8 +9,10 @@ class StatisticsScreenv2 extends StatefulWidget {
   State<StatisticsScreenv2> createState() => _StatisticsScreenv2State();
 }
 
-class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
-  int _selectedIndex = 0;
+class _StatisticsScreenv2State extends State<StatisticsScreenv2>
+    with AutomaticKeepAliveClientMixin<StatisticsScreenv2> {
+  static int _lastSelectedTabIndex = 0;
+  int _selectedIndex = _lastSelectedTabIndex;
 
   final List<Widget> _screens = [
     StatisticsAllScreen(), // 차트, 통계 요약 등
@@ -20,7 +20,11 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
   ];
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       appBar: AppBar(
         surfaceTintColor: Colors.white,
@@ -52,7 +56,11 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
                   backgroundColor:
                       _selectedIndex == 1 ? Colors.white : Color(0xff6BAD97),
                 ),
-                onPressed: () => setState(() => _selectedIndex = 0),
+                onPressed:
+                    () => setState(() {
+                      _selectedIndex = 0;
+                      _lastSelectedTabIndex = _selectedIndex;
+                    }),
                 child: Text(
                   "전체 통계",
                   style: TextStyle(
@@ -76,7 +84,11 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
                   backgroundColor:
                       _selectedIndex == 1 ? Color(0xff6BAD97) : Colors.white,
                 ),
-                onPressed: () => setState(() => _selectedIndex = 1),
+                onPressed:
+                    () => setState(() {
+                      _selectedIndex = 1;
+                      _lastSelectedTabIndex = _selectedIndex;
+                    }),
                 child: Text(
                   "기록 리스트",
                   style: TextStyle(
@@ -91,9 +103,13 @@ class _StatisticsScreenv2State extends State<StatisticsScreenv2> {
               ),
             ],
           ),
-          // 본문 화면 스크롤 영역
+          // 본문 화면: 두 탭 위젯을 모두 유지하여 상태 보존
           Expanded(
-            child: SingleChildScrollView(child: _screens[_selectedIndex]),
+            child: IndexedStack(
+              index: _selectedIndex,
+              children:
+                  _screens.map((w) => SingleChildScrollView(child: w)).toList(),
+            ),
           ),
         ],
       ),
