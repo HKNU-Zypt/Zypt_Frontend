@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:focused_study_time_tracker/components/statsCard.dart';
 import 'package:focused_study_time_tracker/components/focus_line_bar.dart';
 import 'package:focused_study_time_tracker/models/focus_time.dart'; // DTO 모델 import
@@ -63,73 +64,111 @@ class FocusResultScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Column(
-          children: [
-            SizedBox(height: 16),
-            Text(
-              '집중 분석 결과',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'SoyoMaple',
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            children: [
+              SizedBox(height: 16),
+              Text(
+                '집중 분석 결과',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'SoyoMaple',
+                ),
               ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              "${now.year}.${now.month}.${now.day} (${weekdays[now.weekday - 1]})",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'AppleSDGothicNeo',
+              SizedBox(height: 8),
+              Text(
+                "${now.year}.${now.month}.${now.day} (${weekdays[now.weekday - 1]})",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'AppleSDGothicNeo',
+                ),
               ),
-            ),
-            SizedBox(height: 32),
-            OffsetOutlinedCard(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-              child: FocusTimelineBar(
-                start: sessionStart,
-                end: sessionEnd,
-                unfocused: distractedIntervals,
-                sleep: sleepIntervals,
-                height: 45,
+              SizedBox(height: 32),
+              OffsetOutlinedCard(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                child: FocusTimelineBar(
+                  start: sessionStart,
+                  end: sessionEnd,
+                  unfocused: distractedIntervals,
+                  sleep: sleepIntervals,
+                  height: 45,
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            OffsetOutlinedCard(
-              padding: const EdgeInsets.fromLTRB(60, 16, 60, 16),
-              child: Column(
-                children:
-                    stats.entries
-                        .map(
-                          (e) => Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  e.key,
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontFamily: 'AppleSDGothicNeo',
-                                    fontWeight: FontWeight.w500,
+              SizedBox(height: 20),
+              OffsetOutlinedCard(
+                padding: const EdgeInsets.fromLTRB(60, 16, 60, 16),
+                child: Column(
+                  children:
+                      stats.entries
+                          .map(
+                            (e) => Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    e.key,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontFamily: 'AppleSDGothicNeo',
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  e.value,
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontFamily: 'AppleSDGothicNeo',
-                                    fontWeight: FontWeight.bold,
+                                  Text(
+                                    e.value,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontFamily: 'AppleSDGothicNeo',
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        )
-                        .toList(),
+                          )
+                          .toList(),
+                ),
               ),
-            ),
-          ],
+              Spacer(),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 32.0),
+                child: SizedBox(
+                  width: 320,
+                  height: 40,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      elevation: 0,
+                      side: BorderSide(color: Colors.black, width: 1),
+                    ),
+                    onPressed: () {
+                      context.go('/home');
+                    },
+                    child: Center(
+                      child: Text(
+                        '홈으로 이동',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          fontFamily: 'SoyoMaple',
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
